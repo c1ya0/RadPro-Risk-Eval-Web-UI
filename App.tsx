@@ -103,9 +103,12 @@ const RadarChart = ({ data }: { data: RadarData }) => {
     { label: "Comorbidities", key: 'comorbidities' }
   ];
 
-  const scale = 100; // Radius
-  const cx = 200; // Center X (Canvas width 400)
-  const cy = 180; // Center Y (Canvas height 360)
+  // Up-scaled layout for better visibility
+  const scale = 160; 
+  const width = 600; // Increased width to prevent clipping
+  const cx = 300;    // Adjusted center based on new width
+  const cy = 225;
+  const height = 450;
   
   const getPoint = (value: number, index: number, total: number, radiusScale = 1) => {
     const angle = (Math.PI * 2 * index) / total - Math.PI / 2;
@@ -116,8 +119,8 @@ const RadarChart = ({ data }: { data: RadarData }) => {
   const points = axes.map((axis, i) => getPoint(data[axis.key as keyof RadarData] || 0, i, axes.length)).join(' ');
   
   return (
-    <div className="flex justify-center items-center py-4">
-      <svg width="100%" height="350" viewBox="0 0 400 360" className="overflow-visible max-w-[500px]">
+    <div className="w-full flex justify-center items-center py-4">
+      <svg width="100%" viewBox={`0 0 ${width} ${height}`} className="overflow-visible w-full h-auto max-w-[600px]">
         {/* Grid Levels */}
         {[25, 50, 75, 100].map(level => (
            <polygon 
@@ -137,12 +140,12 @@ const RadarChart = ({ data }: { data: RadarData }) => {
         })}
 
         {/* Data Area */}
-        <polygon points={points} fill="rgba(14, 165, 233, 0.2)" stroke="#0ea5e9" strokeWidth="2" />
+        <polygon points={points} fill="rgba(14, 165, 233, 0.2)" stroke="#0ea5e9" strokeWidth="3" />
         
         {/* Data Points & Labels */}
         {axes.map((axis, i) => {
             const [x, y] = getPoint(data[axis.key as keyof RadarData] || 0, i, axes.length);
-            const [lx, ly] = getPoint(100, i, axes.length, 1.25); // Label position (1.25x radius)
+            const [lx, ly] = getPoint(100, i, axes.length, 1.25); // Increased label spacing
             
             // Dynamic text anchor based on position relative to center
             let anchor: "middle" | "end" | "start" = "middle";
@@ -151,13 +154,13 @@ const RadarChart = ({ data }: { data: RadarData }) => {
 
             return (
                 <g key={i}>
-                    <circle cx={x} cy={y} r="4" className="text-medical-600 fill-current" />
+                    <circle cx={x} cy={y} r="6" className="text-medical-600 fill-white stroke-2 stroke-current" />
                     <text 
                         x={lx} 
                         y={ly} 
                         textAnchor={anchor} 
                         alignmentBaseline="middle" 
-                        className="text-xs font-bold fill-gray-600"
+                        className="text-sm font-bold fill-gray-700"
                     >
                         {axis.label}
                     </text>
@@ -236,9 +239,27 @@ const EproView = () => {
   const [frequency, setFrequency] = useState<number>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [history, setHistory] = useState<EproRecord[]>([
-      { id: 'REC-001', date: '2024-02-14', bleeding: 'none', pain: 2, urgency: 1, frequency: 1 },
-      { id: 'REC-002', date: '2024-02-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
+      { id: 'REC-001', date: '2025-11-14', bleeding: 'none', pain: 2, urgency: 1, frequency: 1 },
+      { id: 'REC-002', date: '2025-11-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
   ]);
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const tabs = [
+    { id: 'report', label: 'Symptom Report', icon: '📝' },
+    { id: 'history', label: 'History Trends', icon: '📊' }
+  ];
+
+  useEffect(() => {
+    const activeIndex = tabs.findIndex(t => t.id === activeTab);
+    const el = tabsRef.current[activeIndex];
+    if (el) {
+        setIndicatorStyle({
+            left: el.offsetLeft,
+            width: el.offsetWidth
+        });
+    }
+  }, [activeTab]);
 
   const handleSubmit = () => {
     setIsSubmitted(true);
@@ -259,9 +280,9 @@ const EproView = () => {
 
   const getBleedingLabel = (type: string) => {
       switch(type) {
-          case 'none': return '無';
-          case 'mild': return '輕微 (衛生紙)';
-          case 'severe': return '嚴重 (滴血)';
+          case 'none': return 'None';
+          case 'mild': return 'Mild';
+          case 'severe': return 'Severe';
           default: return '';
       }
   };
@@ -270,19 +291,24 @@ const EproView = () => {
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       
       {/* Tabs */}
-      <div className="flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
-        <button 
-          onClick={() => setActiveTab('report')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'report' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          <span>📝 症狀回報 (Report)</span>
-        </button>
-        <button 
-          onClick={() => setActiveTab('history')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'history' ? 'bg-blue-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-        >
-          <span>📊 歷史趨勢 (History)</span>
-        </button>
+      <div className="relative flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
+        {/* Animated Glider */}
+        <div 
+           className="absolute top-1 bottom-1 bg-blue-600 rounded-md transition-all duration-300 ease-out shadow-sm"
+           style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+        ></div>
+
+        {tabs.map((tab, index) => (
+            <button
+               key={tab.id}
+               ref={el => tabsRef.current[index] = el}
+               onClick={() => setActiveTab(tab.id as any)}
+               className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
+                   ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+            >
+                <span>{tab.icon} {tab.label}</span>
+            </button>
+        ))}
       </div>
 
       {activeTab === 'report' && (
@@ -294,8 +320,7 @@ const EproView = () => {
                  <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-xl">🩸</div>
                     <div>
-                        <span className="font-bold text-gray-800 text-lg block">是否有排便出血？</span>
-                        <span className="text-xs text-gray-400">Rectal Bleeding Status</span>
+                        <span className="font-bold text-gray-800 text-lg block">Rectal Bleeding Status</span>
                     </div>
                  </div>
              </div>
@@ -328,7 +353,7 @@ const EproView = () => {
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center text-xl">😣</div>
                         <div>
-                            <span className="font-bold text-gray-800 text-lg block">疼痛指數</span>
+                            <span className="font-bold text-gray-800 text-lg block">Pain Index</span>
                             <span className="text-xs text-gray-400">Pain Level (0-10)</span>
                         </div>
                       </div>
@@ -344,8 +369,8 @@ const EproView = () => {
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-yellow-500 focus:outline-none focus:ring-0"
                      />
                      <div className="flex justify-between text-xs text-gray-400 mt-2">
-                         <span>無痛</span>
-                         <span>最痛</span>
+                         <span>No Pain</span>
+                         <span>Max Pain</span>
                      </div>
                   </div>
               </div>
@@ -356,7 +381,7 @@ const EproView = () => {
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-xl">⚡</div>
                         <div>
-                            <span className="font-bold text-gray-800 text-lg block">排便急迫感</span>
+                            <span className="font-bold text-gray-800 text-lg block">Urgency</span>
                             <span className="text-xs text-gray-400">Urgency Level (0-10)</span>
                         </div>
                       </div>
@@ -372,8 +397,8 @@ const EproView = () => {
                         className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-blue-500 focus:outline-none focus:ring-0"
                      />
                      <div className="flex justify-between text-xs text-gray-400 mt-2">
-                         <span>正常</span>
-                         <span>嚴重</span>
+                         <span>Normal</span>
+                         <span>Severe</span>
                      </div>
                   </div>
               </div>
@@ -385,8 +410,8 @@ const EproView = () => {
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-xl">🚽</div>
                     <div>
-                        <span className="font-bold text-gray-800 text-lg block">今日排便次數</span>
-                        <span className="text-xs text-gray-400">Stool Frequency</span>
+                        <span className="font-bold text-gray-800 text-lg block">Stool Frequency</span>
+                        <span className="text-xs text-gray-400">Daily Count</span>
                     </div>
                   </div>
               </div>
@@ -398,7 +423,7 @@ const EproView = () => {
                    >-</button>
                    <div className="w-24 text-center">
                        <span className="text-5xl font-bold text-gray-800">{frequency}</span>
-                       <span className="block text-xs text-gray-400 mt-1">次/day</span>
+                       <span className="block text-xs text-gray-400 mt-1">times/day</span>
                    </div>
                    <button 
                       onClick={() => setFrequency(frequency + 1)}
@@ -414,11 +439,11 @@ const EproView = () => {
           >
              {isSubmitted ? (
                  <>
-                   <Icons.Check /> <span>回報成功！已儲存至歷史紀錄</span>
+                   <Icons.Check /> <span>Report Saved!</span>
                  </>
              ) : (
                  <>
-                   <Icons.Upload /> <span>提交回報</span>
+                   <Icons.Upload /> <span>Submit Report</span>
                  </>
              )}
           </button>
@@ -430,7 +455,7 @@ const EproView = () => {
              {history.length === 0 ? (
                  <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
                      <div className="text-4xl mb-4 text-gray-300">📊</div>
-                     <p className="text-gray-500">尚無歷史紀錄，請先進行症狀回報。</p>
+                     <p className="text-gray-500">No history records found. Please submit a report first.</p>
                  </div>
              ) : (
                  history.map((record) => (
@@ -440,28 +465,28 @@ const EproView = () => {
                                  {record.date}
                              </div>
                              <div>
-                                 <p className="font-bold text-gray-800">症狀摘要</p>
+                                 <p className="font-bold text-gray-800">Summary</p>
                                  <p className="text-xs text-gray-500">ID: {record.id}</p>
                              </div>
                          </div>
                          
                          <div className="flex items-center space-x-6 text-sm">
                              <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">出血</span>
+                                 <span className="block text-gray-400 text-xs">Bleeding</span>
                                  <span className={`font-bold ${record.bleeding === 'none' ? 'text-green-600' : 'text-red-600'}`}>
                                      {getBleedingLabel(record.bleeding)}
                                  </span>
                              </div>
                              <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">疼痛</span>
+                                 <span className="block text-gray-400 text-xs">Pain</span>
                                  <span className="font-bold text-gray-800">{record.pain}/10</span>
                              </div>
                              <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">急迫</span>
+                                 <span className="block text-gray-400 text-xs">Urgency</span>
                                  <span className="font-bold text-gray-800">{record.urgency}/10</span>
                              </div>
                               <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">次數</span>
+                                 <span className="block text-gray-400 text-xs">Freq</span>
                                  <span className="font-bold text-gray-800">{record.frequency}</span>
                              </div>
                          </div>
@@ -479,7 +504,7 @@ const DashboardView = ({
   onViewAllHistory,
   onViewHistoryItem 
 }: { 
-  onNewAssessment: () => void,
+  onNewAssessment: () => void, 
   onViewAllHistory: () => void,
   onViewHistoryItem: (item: any) => void
 }) => {
@@ -905,6 +930,26 @@ const ResultView = ({
     readOnly?: boolean 
 }) => {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'population' | 'analysis' | 'report'>('dashboard');
+  const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
+  const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
+
+  const tabs = [
+    { id: 'dashboard', label: 'Risk Dashboard', icon: Icons.ChartBar },
+    { id: 'population', label: 'Population Study', icon: Icons.ChartPie },
+    { id: 'analysis', label: 'Analysis Detail', icon: Icons.Radar },
+    { id: 'report', label: 'Decision Report', icon: Icons.Document },
+  ];
+
+  useEffect(() => {
+    const activeIndex = tabs.findIndex(t => t.id === activeTab);
+    const el = tabsRef.current[activeIndex];
+    if (el) {
+        setIndicatorStyle({
+            left: el.offsetLeft,
+            width: el.offsetWidth
+        });
+    }
+  }, [activeTab]);
 
   if (!result) return null;
 
@@ -922,35 +967,25 @@ const ResultView = ({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
-         <button 
-            onClick={() => setActiveTab('dashboard')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'dashboard' ? 'bg-medical-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-         >
-            <Icons.ChartBar />
-            <span>Risk Dashboard</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('population')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'population' ? 'bg-medical-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-         >
-             <Icons.ChartPie />
-            <span>Population Study</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('analysis')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'analysis' ? 'bg-medical-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-         >
-             <Icons.Radar />
-            <span>Analysis Detail</span>
-         </button>
-         <button 
-            onClick={() => setActiveTab('report')}
-            className={`px-4 py-2 rounded-md text-sm font-medium transition-colors flex items-center space-x-2 ${activeTab === 'report' ? 'bg-medical-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-50'}`}
-         >
-             <Icons.Document />
-            <span>Decision Report</span>
-         </button>
+      <div className="relative flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
+         {/* Animated Glider */}
+         <div 
+            className="absolute top-1 bottom-1 bg-medical-600 rounded-md transition-all duration-300 ease-out shadow-sm"
+            style={{ left: indicatorStyle.left, width: indicatorStyle.width }}
+         ></div>
+
+         {tabs.map((tab, index) => (
+             <button
+                key={tab.id}
+                ref={el => tabsRef.current[index] = el}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
+                    ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+             >
+                 <tab.icon />
+                 <span>{tab.label}</span>
+             </button>
+         ))}
       </div>
 
       {/* Tab Content */}
@@ -1006,43 +1041,59 @@ const ResultView = ({
 
         {activeTab === 'analysis' && (
             <div className="animate-fade-in">
-                 <div className="bg-blue-600 text-white p-6 rounded-lg mb-8">
-                     <h3 className="text-xl font-bold flex items-center">
+                 {/* Replaced Blue Header with Text */}
+                 <div className="mb-8 border-b border-gray-100 pb-4">
+                     <h3 className="text-2xl font-bold text-gray-800 flex items-center">
                          <Icons.Radar /> 
-                         <span className="ml-2">Risk Radar: Multi-dimensional Evaluation</span>
+                         <span className="ml-3">Risk Radar Analysis</span>
                      </h3>
-                     <p className="text-blue-100 mt-1 text-sm">Visualizing contribution of distinct risk factors.</p>
+                     <p className="text-gray-500 mt-2 text-base ml-8">
+                         Multi-dimensional evaluation visualizing the contribution of distinct risk factors to the overall prognosis.
+                     </p>
                  </div>
 
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                     <RadarChart data={result.radarData} />
+                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+                     {/* Chart Section - Takes up 2 columns on large screens for size */}
+                     <div className="lg:col-span-2 flex justify-center bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
+                         <RadarChart data={result.radarData} />
+                     </div>
                      
+                     {/* Info Section */}
                      <div className="space-y-6">
-                         <div className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                             <h4 className="font-bold text-yellow-600 flex items-center mb-2">
-                                 ⚠ Key Risk Drivers
+                         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                             <h4 className="font-bold text-gray-900 text-lg flex items-center mb-4">
+                                 <span className="w-1 h-6 bg-yellow-500 rounded mr-3"></span>
+                                 Key Risk Drivers
                              </h4>
-                             <ul className="text-sm space-y-2 text-gray-700">
+                             <ul className="space-y-4">
                                  {Object.entries(result.radarData)
-                                    .filter(([_, val]) => val > 50)
                                     .map(([key, val]) => (
-                                     <li key={key} className="flex justify-between border-b border-gray-100 last:border-0 pb-1">
-                                         <span className="capitalize font-medium">{key}</span>
-                                         <span className="font-bold">{Math.round(val)}%</span>
+                                     <li key={key} className="flex flex-col">
+                                         <div className="flex justify-between items-end mb-1">
+                                            <span className="capitalize text-gray-600 font-medium text-sm">{key}</span>
+                                            <span className="font-bold text-gray-900">{Math.round(val)}%</span>
+                                         </div>
+                                         <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div 
+                                                className={`h-1.5 rounded-full ${val > 50 ? 'bg-orange-500' : 'bg-blue-400'}`} 
+                                                style={{ width: `${val}%` }}
+                                            ></div>
+                                         </div>
                                      </li>
                                  ))}
-                                 {Object.entries(result.radarData).every(([_, val]) => val <= 50) && (
-                                     <li className="text-gray-500 italic">No dominant risk factors identified.</li>
-                                 )}
                              </ul>
                          </div>
 
-                         <div className="bg-green-50 border border-green-200 rounded-lg p-6 text-center">
-                             <div className="mx-auto w-12 h-12 bg-green-100 text-green-600 rounded-full flex items-center justify-center mb-2">
+                         <div className="bg-green-50 border border-green-100 rounded-xl p-6 flex items-start space-x-4">
+                             <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex-shrink-0 flex items-center justify-center">
                                  <Icons.Check />
                              </div>
-                             <h4 className="font-bold text-green-800">No Contraindications</h4>
-                             <p className="text-xs text-green-600 mt-1">Patient eligible for standard care path.</p>
+                             <div>
+                                 <h4 className="font-bold text-green-800 text-lg">No Contraindications</h4>
+                                 <p className="text-sm text-green-700 mt-1 leading-relaxed">
+                                    Patient is currently eligible for standard radiation therapy protocols without modification.
+                                 </p>
+                             </div>
                          </div>
                      </div>
                  </div>

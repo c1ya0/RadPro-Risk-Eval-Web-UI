@@ -1,5 +1,5 @@
 {
-  "name": "RadPro Risk Eval Web UI",
+  "name": "RadSheild Eval Web UI",
   "description": "A professional-grade medical risk evaluation dashboard for Radiation Proctitis analysis, replacing legacy Streamlit interfaces with a modern React UI and Gemini AI integration.",
   "requestFramePermissions": []
 }

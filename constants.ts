@@ -1,7 +1,8 @@
+
 import { Gender, TreatmentType, PatientData, AnalysisResult } from './types';
 
 export const INITIAL_PATIENT_DATA: PatientData = {
-  id: 'PT-2024-001',
+  id: 'PT-2025-001',
   age: 65,
   gender: Gender.Male,
   totalDoseGy: 70,
@@ -44,14 +45,14 @@ export const MOCK_DASHBOARD_STATS = {
 };
 
 export const MOCK_HISTORY_DATA = [
-  { id: 'PT-2024-089', date: '2024-02-14', age: 72, treatment: 'VMAT (Standard)', score: 88, level: 'Critical' },
-  { id: 'PT-2024-088', date: '2024-02-14', age: 58, treatment: 'IMRT', score: 45, level: 'Moderate' },
-  { id: 'PT-2024-087', date: '2024-02-13', age: 66, treatment: 'VMAT (Standard)', score: 12, level: 'Low' },
-  { id: 'PT-2024-086', date: '2024-02-12', age: 70, treatment: 'Proton Therapy', score: 32, level: 'Low' },
-  { id: 'PT-2024-085', date: '2024-02-11', age: 62, treatment: 'VMAT (Standard)', score: 75, level: 'High' },
-  { id: 'PT-2024-084', date: '2024-02-10', age: 55, treatment: 'VMAT (Standard)', score: 28, level: 'Low' },
-  { id: 'PT-2024-083', date: '2024-02-09', age: 69, treatment: 'IMRT', score: 60, level: 'Moderate' },
-  { id: 'PT-2024-082', date: '2024-02-08', age: 74, treatment: 'Proton Therapy', score: 92, level: 'Critical' },
+  { id: 'PT-2025-089', date: '2025-11-14', age: 72, treatment: 'VMAT (Standard)', score: 88, level: 'Critical' },
+  { id: 'PT-2025-088', date: '2025-11-14', age: 58, treatment: 'IMRT', score: 45, level: 'Moderate' },
+  { id: 'PT-2025-087', date: '2025-11-13', age: 66, treatment: 'VMAT (Standard)', score: 12, level: 'Low' },
+  { id: 'PT-2025-086', date: '2025-11-12', age: 70, treatment: 'Proton Therapy', score: 32, level: 'Low' },
+  { id: 'PT-2025-085', date: '2025-11-11', age: 62, treatment: 'VMAT (Standard)', score: 75, level: 'High' },
+  { id: 'PT-2025-084', date: '2025-11-10', age: 55, treatment: 'VMAT (Standard)', score: 28, level: 'Low' },
+  { id: 'PT-2025-083', date: '2025-11-09', age: 69, treatment: 'IMRT', score: 60, level: 'Moderate' },
+  { id: 'PT-2025-082', date: '2025-11-08', age: 74, treatment: 'Proton Therapy', score: 92, level: 'Critical' },
 ];
 
 // Helper to expand simple history items into full mock analysis results
