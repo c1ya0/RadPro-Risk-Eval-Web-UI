@@ -1,8 +1,9 @@
 
 import React, { useState, useEffect, useRef } from 'react';
-import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord } from './types';
+import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord, ChatMessage } from './types';
 import { INITIAL_PATIENT_DATA, COMORBIDITY_OPTIONS, GENOMIC_OPTIONS, MOCK_DASHBOARD_STATS, MOCK_HISTORY_DATA, hydrateHistoryItem } from './constants';
-import { evaluatePatientRisk } from './services';
+import { evaluatePatientRisk, createMedicalChatSession } from './services';
+import { Chat, GenerateContentResponse } from "@google/genai";
 
 // --- Icons ---
 const Icons = {
@@ -34,7 +35,10 @@ const Icons = {
   Document: () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>,
   Radar: () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h8a1 1 0 001-1zm8-10a1 1 0 00-1-1h-4a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V6zM17 16a2 2 0 11-4 0 2 2 0 014 0z" /></svg>,
   Clipboard: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>,
-  Upload: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>
+  Upload: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>,
+  Sparkles: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>,
+  Send: () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>,
+  X: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
 };
 
 // --- Shared Styles ---
@@ -42,19 +46,168 @@ const inputClass = "w-full p-2.5 bg-gray-50 text-gray-900 border border-gray-300
 
 // --- Components ---
 
-const SidebarItem = ({ icon: Icon, label, active, onClick }: { icon: any, label: string, active: boolean, onClick: () => void }) => (
-  <button
-    onClick={onClick}
-    className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 ${
-      active 
-        ? 'bg-medical-100 text-medical-900 border-r-4 border-medical-600' 
-        : 'text-gray-500 hover:bg-gray-50 hover:text-medical-600'
-    }`}
-  >
-    <Icon />
-    <span className="font-medium">{label}</span>
-  </button>
+const SidebarItem = React.forwardRef<HTMLButtonElement, { icon: any, label: string, active: boolean, onClick: () => void }>(
+  ({ icon: Icon, label, active, onClick }, ref) => (
+    <button
+      ref={ref}
+      onClick={onClick}
+      className={`relative w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 z-10 ${
+        active 
+          ? 'text-medical-900' 
+          : 'text-gray-500 hover:bg-gray-50 hover:text-medical-600'
+      }`}
+    >
+      <Icon />
+      <span className="font-medium">{label}</span>
+    </button>
+  )
 );
+
+const ChatWidget = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([
+    { id: 'welcome', role: 'model', text: 'Hello Dr. Smith. I am your RadShield Assistant. How can I help you with your patients today?', timestamp: Date.now() }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const chatSessionRef = useRef<Chat | null>(null);
+
+  useEffect(() => {
+    if (!chatSessionRef.current) {
+      chatSessionRef.current = createMedicalChatSession();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      scrollToBottom();
+    }
+  }, [messages, isOpen]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleSend = async () => {
+    if (!input.trim() || !chatSessionRef.current) return;
+
+    const userMsg: ChatMessage = {
+      id: Date.now().toString(),
+      role: 'user',
+      text: input,
+      timestamp: Date.now()
+    };
+
+    setMessages(prev => [...prev, userMsg]);
+    setInput('');
+    setIsLoading(true);
+
+    try {
+      const result = await chatSessionRef.current.sendMessageStream({ message: userMsg.text });
+      
+      let fullResponse = "";
+      const botMsgId = (Date.now() + 1).toString();
+      
+      // Add initial placeholder for streaming
+      setMessages(prev => [...prev, { id: botMsgId, role: 'model', text: '', timestamp: Date.now() }]);
+
+      for await (const chunk of result) {
+        const c = chunk as GenerateContentResponse;
+        if (c.text) {
+          fullResponse += c.text;
+          setMessages(prev => prev.map(msg => 
+            msg.id === botMsgId ? { ...msg, text: fullResponse } : msg
+          ));
+        }
+      }
+    } catch (error) {
+      console.error("Chat Error", error);
+      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: "I apologize, but I'm having trouble connecting to the service right now.", timestamp: Date.now() }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+      {/* Chat Window */}
+      {isOpen && (
+        <div className="mb-4 w-80 md:w-96 h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-fade-in-up">
+          {/* Header */}
+          <div className="bg-medical-900 p-4 flex justify-between items-center text-white">
+            <div className="flex items-center space-x-2">
+              <Icons.Sparkles />
+              <span className="font-bold">Gemini Assistant</span>
+            </div>
+            <button onClick={() => setIsOpen(false)} className="text-white/80 hover:text-white">
+              <Icons.X />
+            </button>
+          </div>
+
+          {/* Messages */}
+          <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
+            {messages.map((msg) => (
+              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                  msg.role === 'user' 
+                    ? 'bg-medical-600 text-white rounded-br-none' 
+                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'
+                }`}>
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-none px-4 py-3 shadow-sm">
+                  <div className="flex space-x-1">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-75"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce delay-150"></div>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input */}
+          <div className="p-3 bg-white border-t border-gray-100">
+            <div className="relative">
+              <input
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                placeholder="Ask Gemini..."
+                className="w-full pl-4 pr-10 py-2.5 bg-gray-100 border-transparent focus:bg-white focus:border-medical-500 rounded-xl text-sm focus:ring-0 transition-all"
+                disabled={isLoading}
+              />
+              <button 
+                onClick={handleSend}
+                disabled={!input.trim() || isLoading}
+                className="absolute right-2 top-2 p-1 text-medical-600 hover:text-medical-800 disabled:opacity-30"
+              >
+                <Icons.Send />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FAB Toggle */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${
+          isOpen ? 'bg-gray-700 text-white' : 'bg-medical-600 text-white'
+        }`}
+      >
+        {isOpen ? <Icons.X /> : <Icons.Sparkles />}
+      </button>
+    </div>
+  );
+};
 
 // --- Visualizations ---
 
@@ -1148,8 +1301,31 @@ function App() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isReadOnlyResult, setIsReadOnlyResult] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
+  const [sidebarGlider, setSidebarGlider] = useState({ top: 0, height: 0, opacity: 0 });
   
   const userMenuRef = useRef<HTMLDivElement>(null);
+  const sidebarRefs = useRef<{[key: string]: HTMLButtonElement | null}>({});
+
+  const SIDEBAR_NAV_ITEMS = [
+    { id: 'dashboard', icon: Icons.Dashboard, label: 'Dashboard' },
+    { id: 'assessment', icon: Icons.Assessment, label: 'Risk Assessment' },
+    { id: 'history', icon: Icons.History, label: 'History' },
+    { id: 'epro', icon: Icons.Clipboard, label: 'ePRO System' }
+  ];
+
+  useEffect(() => {
+    const activeItem = SIDEBAR_NAV_ITEMS.find(item => item.id === view);
+    if (activeItem && sidebarRefs.current[activeItem.id]) {
+        const el = sidebarRefs.current[activeItem.id];
+        if (el) {
+            setSidebarGlider({
+                top: el.offsetTop,
+                height: el.offsetHeight,
+                opacity: 1
+            });
+        }
+    }
+  }, [view]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -1240,31 +1416,27 @@ function App() {
           </div>
         </div>
 
-        <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-          <SidebarItem 
-            icon={Icons.Dashboard} 
-            label="Dashboard" 
-            active={view === 'dashboard'} 
-            onClick={() => { setView('dashboard'); setShowResult(false); }} 
-          />
-          <SidebarItem 
-            icon={Icons.Assessment} 
-            label="Risk Assessment" 
-            active={view === 'assessment'} 
-            onClick={() => { setView('assessment'); setShowResult(false); }} 
-          />
-          <SidebarItem 
-            icon={Icons.History} 
-            label="History" 
-            active={view === 'history'} 
-            onClick={() => { setView('history'); setShowResult(false); }} 
-          />
-          <SidebarItem 
-            icon={Icons.Clipboard} 
-            label="ePRO System" 
-            active={view === 'epro'} 
-            onClick={() => { setView('epro'); setShowResult(false); }} 
-          />
+        <nav className="flex-1 p-4 space-y-1 overflow-y-auto relative">
+            {/* Animated Glider */}
+            <div 
+                className="absolute left-4 right-4 bg-medical-100 border-r-4 border-medical-600 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0"
+                style={{ 
+                    top: sidebarGlider.top, 
+                    height: sidebarGlider.height, 
+                    opacity: sidebarGlider.opacity 
+                }}
+            ></div>
+
+            {SIDEBAR_NAV_ITEMS.map((item) => (
+                <SidebarItem 
+                    key={item.id}
+                    ref={el => sidebarRefs.current[item.id] = el}
+                    icon={item.icon} 
+                    label={item.label} 
+                    active={view === item.id} 
+                    onClick={() => { setView(item.id as any); setShowResult(false); }} 
+                />
+            ))}
         </nav>
 
         {/* User Profile / Menu */}
@@ -1356,6 +1528,9 @@ function App() {
             {renderMainContent()}
         </main>
       </div>
+
+      {/* Global Chat Widget */}
+      <ChatWidget />
     </div>
   );
 }

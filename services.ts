@@ -1,8 +1,17 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Chat } from "@google/genai";
 import { PatientData, AnalysisResult } from "./types";
 
 // Initialize Gemini
 const ai = new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
+
+export function createMedicalChatSession(): Chat {
+  return ai.chats.create({
+    model: "gemini-2.5-flash",
+    config: {
+      systemInstruction: "You are an intelligent medical assistant named 'RadShield Assistant'. You are assisting a Radiation Oncologist. You are helpful, precise, and professional. You can answer general medical questions, explain radiation proctitis concepts, or help interpret risk data if provided. Keep answers concise suitable for a dashboard interface.",
+    }
+  });
+}
 
 export async function evaluatePatientRisk(data: PatientData): Promise<AnalysisResult> {
   const model = "gemini-2.5-flash";

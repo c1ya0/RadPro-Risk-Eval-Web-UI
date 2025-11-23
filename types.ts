@@ -58,4 +58,11 @@ export interface EproRecord {
   frequency: number;
 }
 
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  timestamp: number;
+}
+
 export type ViewState = 'dashboard' | 'assessment' | 'history' | 'settings' | 'epro';
