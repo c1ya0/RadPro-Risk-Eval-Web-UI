@@ -4,6 +4,32 @@ A modern, medical-grade web application designed for Radiation Oncologists to as
 
 This project upgrades a legacy Streamlit prototype into a full-featured, responsive React application integrated with Google's Gemini 2.5 Flash AI for intelligent clinical decision support.
 
+---
+
+## 📸 Interface Preview
+
+### 1. Department Dashboard
+*A high-level overview of department statistics, recent critical cases, and risk distribution.*
+![Department Dashboard](docs/images/dashboard_preview.png)
+
+### 2. AI Risk Assessment Form
+*Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
+![Risk Assessment Form](docs/images/assessment_form.png)
+
+### 3. Analysis Results & Clinical Decision Support
+*Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
+![Analysis Results](docs/images/results_view.png)
+
+### 4. ePRO System (Patient View)
+*Mobile-responsive interface for patients to report symptoms like bleeding, pain, and urgency.*
+![ePRO System](docs/images/epro_system.png)
+
+### 5. Gemini Medical Assistant
+*Integrated chatbot for real-time medical queries and data interpretation.*
+![Gemini Chat Widget](docs/images/chat_widget.png)
+
+---
+
 ## 🌟 Key Features
 
 ### 1. **Intelligent Risk Assessment**

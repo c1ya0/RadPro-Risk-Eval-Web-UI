@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord, ChatMessage } from './types';
 import { INITIAL_PATIENT_DATA, COMORBIDITY_OPTIONS, GENOMIC_OPTIONS, MOCK_DASHBOARD_STATS, MOCK_HISTORY_DATA, hydrateHistoryItem } from './constants';
@@ -454,7 +455,7 @@ const EproView = () => {
         {tabs.map((tab, index) => (
             <button
                key={tab.id}
-               ref={el => tabsRef.current[index] = el}
+               ref={el => { tabsRef.current[index] = el; }}
                onClick={() => setActiveTab(tab.id as any)}
                className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
                    ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
@@ -1130,7 +1131,7 @@ const ResultView = ({
          {tabs.map((tab, index) => (
              <button
                 key={tab.id}
-                ref={el => tabsRef.current[index] = el}
+                ref={el => { tabsRef.current[index] = el; }}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
                     ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
@@ -1430,7 +1431,7 @@ function App() {
             {SIDEBAR_NAV_ITEMS.map((item) => (
                 <SidebarItem 
                     key={item.id}
-                    ref={el => sidebarRefs.current[item.id] = el}
+                    ref={el => { sidebarRefs.current[item.id] = el; }}
                     icon={item.icon} 
                     label={item.label} 
                     active={view === item.id} 
