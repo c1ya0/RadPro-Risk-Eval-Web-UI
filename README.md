@@ -15,19 +15,26 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 2. AI Risk Assessment Form
 *Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
-![Risk Assessment Form](docs/images/assessment_form.png)
+<img width="1288" height="781" alt="2025-11-24_20-49" src="https://github.com/user-attachments/assets/def1fa9d-383d-4c03-8806-a9dcd3355967" />
+
 
 ### 3. Analysis Results & Clinical Decision Support
 *Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
-![Analysis Results](docs/images/results_view.png)
+<img width="1287" height="778" alt="2025-11-24_20-50" src="https://github.com/user-attachments/assets/b9863a54-eceb-4c56-b770-5c72b1013932" />
+<img width="1288" height="782" alt="2025-11-24_20-50_1" src="https://github.com/user-attachments/assets/65b8e9b2-3ded-41d5-b8be-108af2d4a35c" />
+<img width="1286" height="781" alt="2025-11-24_20-51" src="https://github.com/user-attachments/assets/fb315030-5866-4afb-a286-8f5a4d9443ae" />
+<img width="1290" height="781" alt="2025-11-24_20-51_1" src="https://github.com/user-attachments/assets/1e23734b-c31a-4afc-b4c1-a4a28ae150a2" />
+
 
 ### 4. ePRO System (Patient View)
 *Mobile-responsive interface for patients to report symptoms like bleeding, pain, and urgency.*
-![ePRO System](docs/images/epro_system.png)
+<img width="1299" height="778" alt="2025-11-24_20-52" src="https://github.com/user-attachments/assets/6dbbe374-1f43-4bd3-93cb-b1799d53925a" />
+
 
 ### 5. Gemini Medical Assistant
 *Integrated chatbot for real-time medical queries and data interpretation.*
-![Gemini Chat Widget](docs/images/chat_widget.png)
+<img width="363" height="590" alt="2025-11-24_20-52_1" src="https://github.com/user-attachments/assets/7531e8ea-e46f-43e3-ac7e-c4b55097989f" />
+
 
 ---
 
