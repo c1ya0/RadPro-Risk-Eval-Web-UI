@@ -50,6 +50,7 @@ export interface AnalysisResult {
 }
 
 export interface EproRecord {
+  type: 'general';
   id: string;
   date: string;
   bleeding: 'none' | 'mild' | 'severe';
@@ -57,6 +58,16 @@ export interface EproRecord {
   urgency: number;
   frequency: number;
 }
+
+export interface Prt20Record {
+  type: 'prt20';
+  id: string;
+  date: string;
+  answers: Record<number, number | string>; // Question ID -> Answer (1-4, 'Yes'/'No', or number)
+  totalScore: number; // Normalized 0-100 based on Likert items
+}
+
+export type HistoryItem = EproRecord | Prt20Record;
 
 export interface ChatMessage {
   id: string;

@@ -1,8 +1,7 @@
 
-
 import React, { useState, useEffect, useRef } from 'react';
-import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord, ChatMessage } from './types';
-import { INITIAL_PATIENT_DATA, COMORBIDITY_OPTIONS, GENOMIC_OPTIONS, MOCK_DASHBOARD_STATS, MOCK_HISTORY_DATA, hydrateHistoryItem } from './constants';
+import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord, ChatMessage, Prt20Record, HistoryItem } from './types';
+import { INITIAL_PATIENT_DATA, COMORBIDITY_OPTIONS, GENOMIC_OPTIONS, MOCK_DASHBOARD_STATS, MOCK_HISTORY_DATA, hydrateHistoryItem, EORTC_PRT20_ITEMS } from './constants';
 import { evaluatePatientRisk, createMedicalChatSession } from './services';
 import { Chat, GenerateContentResponse } from "@google/genai";
 
@@ -43,7 +42,7 @@ const Icons = {
 };
 
 // --- Shared Styles ---
-const inputClass = "w-full p-2.5 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-medical-500 focus:bg-white focus:border-medical-500 outline-none transition-colors";
+const inputClass = "w-full p-2.5 bg-gray-50/50 backdrop-blur-sm text-gray-900 border border-white/50 rounded-lg focus:ring-2 focus:ring-medical-500 focus:bg-white focus:border-medical-500 outline-none transition-all shadow-sm";
 
 // --- Components ---
 
@@ -55,7 +54,7 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, { icon: any, label: stri
       className={`relative w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-colors duration-200 z-10 ${
         active 
           ? 'text-medical-900' 
-          : 'text-gray-500 hover:bg-gray-50 hover:text-medical-600'
+          : 'text-gray-500 hover:bg-white/40 hover:text-medical-600'
       }`}
     >
       <Icon />
@@ -67,7 +66,7 @@ const SidebarItem = React.forwardRef<HTMLButtonElement, { icon: any, label: stri
 const ChatWidget = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: 'welcome', role: 'model', text: 'Hello Dr. Smith. I am your RadShield Assistant. How can I help you with your patients today?', timestamp: Date.now() }
+    { id: 'welcome', role: 'model', text: 'Hello Dr. Wang. I am your RadShield Assistant. How can I help you with your patients today?', timestamp: Date.now() }
   ]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -134,9 +133,9 @@ const ChatWidget = () => {
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
       {/* Chat Window */}
       {isOpen && (
-        <div className="mb-4 w-80 md:w-96 h-[500px] bg-white rounded-2xl shadow-2xl border border-gray-200 flex flex-col overflow-hidden animate-fade-in-up">
+        <div className="mb-4 w-80 md:w-96 h-[500px] bg-white/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/40 flex flex-col overflow-hidden animate-fade-in-up">
           {/* Header */}
-          <div className="bg-medical-900 p-4 flex justify-between items-center text-white">
+          <div className="bg-medical-900/90 backdrop-blur-md p-4 flex justify-between items-center text-white">
             <div className="flex items-center space-x-2">
               <Icons.Sparkles />
               <span className="font-bold">Gemini Assistant</span>
@@ -147,13 +146,13 @@ const ChatWidget = () => {
           </div>
 
           {/* Messages */}
-          <div className="flex-1 p-4 overflow-y-auto bg-gray-50 space-y-4">
+          <div className="flex-1 p-4 overflow-y-auto bg-gray-50/50 space-y-4">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm ${
+                <div className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm shadow-sm ${
                   msg.role === 'user' 
                     ? 'bg-medical-600 text-white rounded-br-none' 
-                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none shadow-sm'
+                    : 'bg-white border border-gray-200 text-gray-800 rounded-bl-none'
                 }`}>
                   {msg.text}
                 </div>
@@ -174,7 +173,7 @@ const ChatWidget = () => {
           </div>
 
           {/* Input */}
-          <div className="p-3 bg-white border-t border-gray-100">
+          <div className="p-3 bg-white/60 border-t border-gray-100 backdrop-blur-md">
             <div className="relative">
               <input
                 type="text"
@@ -182,7 +181,7 @@ const ChatWidget = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                 placeholder="Ask Gemini..."
-                className="w-full pl-4 pr-10 py-2.5 bg-gray-100 border-transparent focus:bg-white focus:border-medical-500 rounded-xl text-sm focus:ring-0 transition-all"
+                className="w-full pl-4 pr-10 py-2.5 bg-gray-100/50 border-transparent focus:bg-white focus:border-medical-500 rounded-xl text-sm focus:ring-0 transition-all"
                 disabled={isLoading}
               />
               <button 
@@ -200,8 +199,8 @@ const ChatWidget = () => {
       {/* FAB Toggle */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 ${
-          isOpen ? 'bg-gray-700 text-white' : 'bg-medical-600 text-white'
+        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-transform hover:scale-105 active:scale-95 border border-white/20 backdrop-blur-md ${
+          isOpen ? 'bg-gray-700/80 text-white' : 'bg-medical-600/90 text-white'
         }`}
       >
         {isOpen ? <Icons.X /> : <Icons.Sparkles />}
@@ -334,7 +333,7 @@ const BellCurve = ({ percentile }: { percentile: number }) => {
             {/* Legend positioned outside SVG to prevent overlap */}
             <div className="flex justify-center gap-6 mb-6">
                 <div className="flex items-center text-xs font-bold text-gray-700">
-                    <span className="w-8 h-[2px] bg-blue-500 mr-2 border-b border-dashed border-blue-500"></span>
+                    <span className="w-8 h-[2px] bg-blue-50 mr-2 border-b border-dashed border-blue-500"></span>
                     Line: Population
                 </div>
                 <div className="flex items-center text-xs font-bold text-gray-700">
@@ -386,21 +385,30 @@ const BellCurve = ({ percentile }: { percentile: number }) => {
 // --- Main Views ---
 
 const EproView = () => {
-  const [activeTab, setActiveTab] = useState<'report' | 'history'>('report');
+  const [activeTab, setActiveTab] = useState<'report' | 'qlq-prt20' | 'history'>('report');
   const [bleeding, setBleeding] = useState<'none' | 'mild' | 'severe'>('none');
   const [pain, setPain] = useState<number>(0);
   const [urgency, setUrgency] = useState<number>(0);
   const [frequency, setFrequency] = useState<number>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
-  const [history, setHistory] = useState<EproRecord[]>([
-      { id: 'REC-001', date: '2025-11-14', bleeding: 'none', pain: 2, urgency: 1, frequency: 1 },
-      { id: 'REC-002', date: '2025-11-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
+  
+  // Update state to hold mixed record types
+  const [history, setHistory] = useState<HistoryItem[]>([
+      { type: 'general', id: 'REC-001', date: '2025-11-14', bleeding: 'none', pain: 2, urgency: 1, frequency: 1 },
+      { type: 'general', id: 'REC-002', date: '2025-11-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
   ]);
+  
+  // PRT20 State
+  const [prt20Answers, setPrt20Answers] = useState<Record<number, number | string>>({});
+  const [prt20Result, setPrt20Result] = useState<Prt20Record | null>(null);
+  const [prt20Submitted, setPrt20Submitted] = useState(false);
+
   const [indicatorStyle, setIndicatorStyle] = useState({ left: 0, width: 0 });
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const tabs = [
     { id: 'report', label: 'Symptom Report', icon: '📝' },
+    { id: 'qlq-prt20', label: 'EORTC QLQ-PRT20', icon: '📋' },
     { id: 'history', label: 'History Trends', icon: '📊' }
   ];
 
@@ -418,6 +426,7 @@ const EproView = () => {
   const handleSubmit = () => {
     setIsSubmitted(true);
     const newRecord: EproRecord = {
+        type: 'general',
         id: `REC-${Date.now().toString().slice(-3)}`,
         date: new Date().toISOString().split('T')[0],
         bleeding,
@@ -432,6 +441,57 @@ const EproView = () => {
     }, 1500);
   };
 
+  const handlePrt20Submit = () => {
+      // Validation check
+      const filledCount = Object.keys(prt20Answers).length;
+      if (filledCount < EORTC_PRT20_ITEMS.length) {
+          alert(`Please answer all questions. (${filledCount}/${EORTC_PRT20_ITEMS.length})`);
+          return;
+      }
+
+      // Calculate Symptom Score based on Likert items (1-18)
+      // Standard Linear Transformation: ((Sum - Min) / Range) * 100
+      let rawSum = 0;
+      let itemCount = 0;
+
+      EORTC_PRT20_ITEMS.forEach(item => {
+          if (item.type === 'likert') {
+              const val = prt20Answers[item.id];
+              if (typeof val === 'number') {
+                  rawSum += val;
+                  itemCount++;
+              }
+          }
+      });
+
+      // Min possible per item is 1, max is 4
+      const minPossible = itemCount * 1;
+      const maxPossible = itemCount * 4;
+      const range = maxPossible - minPossible;
+      
+      const normalizedScore = range > 0 ? ((rawSum - minPossible) / range) * 100 : 0;
+
+      const result: Prt20Record = {
+          type: 'prt20',
+          id: `PRT-${Date.now().toString().slice(-3)}`,
+          date: new Date().toISOString().split('T')[0],
+          answers: prt20Answers,
+          totalScore: normalizedScore
+      };
+
+      setPrt20Result(result);
+      setPrt20Submitted(true);
+      
+      // Add to history
+      setHistory([result, ...history]);
+  };
+  
+  const resetPrt20 = () => {
+      setPrt20Answers({});
+      setPrt20Result(null);
+      setPrt20Submitted(false);
+  }
+
   const getBleedingLabel = (type: string) => {
       switch(type) {
           case 'none': return 'None';
@@ -445,7 +505,7 @@ const EproView = () => {
     <div className="space-y-6 animate-fade-in max-w-4xl mx-auto">
       
       {/* Tabs */}
-      <div className="relative flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
+      <div className="relative flex space-x-1 bg-white/60 backdrop-blur-md p-1 rounded-lg border border-white/40 w-fit shadow-sm overflow-x-auto">
         {/* Animated Glider */}
         <div 
            className="absolute top-1 bottom-1 bg-blue-600 rounded-md transition-all duration-300 ease-out shadow-sm"
@@ -457,8 +517,8 @@ const EproView = () => {
                key={tab.id}
                ref={el => { tabsRef.current[index] = el; }}
                onClick={() => setActiveTab(tab.id as any)}
-               className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
-                   ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+               className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 whitespace-nowrap
+                   ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'}`}
             >
                 <span>{tab.icon} {tab.label}</span>
             </button>
@@ -469,7 +529,7 @@ const EproView = () => {
         <div className="space-y-6">
 
           {/* Section 1: Bleeding Status */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
              <div className="flex justify-between items-center mb-6">
                  <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-xl">🩸</div>
@@ -487,7 +547,7 @@ const EproView = () => {
                         className={`py-4 px-2 rounded-lg border-2 transition-all duration-200 flex flex-col items-center justify-center space-y-2
                             ${bleeding === option 
                                 ? 'border-red-500 bg-red-50 text-red-700 shadow-sm' 
-                                : 'border-gray-100 bg-white text-gray-500 hover:border-gray-200 hover:bg-gray-50'
+                                : 'border-gray-100 bg-white/50 text-gray-500 hover:border-gray-200 hover:bg-white'
                             }`}
                      >
                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${bleeding === option ? 'border-red-500' : 'border-gray-300'}`}>
@@ -500,7 +560,7 @@ const EproView = () => {
           </div>
 
           {/* Section 2: Sliders (Pain & Urgency) */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Pain */}
               <div>
                   <div className="flex justify-between items-start mb-6">
@@ -559,7 +619,7 @@ const EproView = () => {
           </div>
 
           {/* Section 3: Frequency */}
-          <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
              <div className="flex justify-between items-center mb-6">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-xl">🚽</div>
@@ -604,48 +664,205 @@ const EproView = () => {
         </div>
       )}
 
+      {activeTab === 'qlq-prt20' && (
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 animate-fade-in">
+              {!prt20Submitted ? (
+                  <>
+                      <div className="mb-6 border-b border-gray-100 pb-4">
+                          <h3 className="text-xl font-bold text-gray-800">EORTC QLQ-PRT20 Questionnaire</h3>
+                          <p className="text-sm text-gray-500">Please answer the following questions regarding your symptoms.</p>
+                      </div>
+                      
+                      <div className="space-y-8">
+                          {/* Header for Likert items */}
+                          <div className="hidden md:flex justify-end pr-2 text-xs font-bold text-gray-400 tracking-wider mb-2">
+                              <span className="w-12 text-center mx-1">Not at all</span>
+                              <span className="w-12 text-center mx-1">A little</span>
+                              <span className="w-12 text-center mx-1">Quite a bit</span>
+                              <span className="w-12 text-center mx-1">Very much</span>
+                          </div>
+
+                          <div className="bg-blue-50/50 p-2 rounded text-xs font-bold text-gray-600 uppercase tracking-wide">
+                              During the past week
+                          </div>
+
+                          {EORTC_PRT20_ITEMS.map((item, idx) => (
+                              <div key={item.id} className="flex flex-col md:flex-row md:items-start justify-between py-2 border-b border-gray-100/50 last:border-0">
+                                  <span className="text-gray-800 font-medium mb-3 md:mb-0 md:w-3/5 md:pr-4">
+                                      {item.id}. {item.text}
+                                  </span>
+                                  
+                                  <div className="flex md:w-2/5 justify-end items-center">
+                                      {item.type === 'likert' && (
+                                          <div className="flex space-x-2">
+                                              {[1, 2, 3, 4].map(val => (
+                                                  <button
+                                                      key={val}
+                                                      onClick={() => setPrt20Answers(prev => ({...prev, [item.id]: val}))}
+                                                      className={`w-12 h-10 rounded-lg border text-sm font-bold transition-all shadow-sm
+                                                          ${prt20Answers[item.id] === val 
+                                                              ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200' 
+                                                              : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'}`}
+                                                  >
+                                                      {val}
+                                                  </button>
+                                              ))}
+                                          </div>
+                                      )}
+
+                                      {item.type === 'yesno' && (
+                                          <div className="flex space-x-4">
+                                              {['Yes', 'No'].map(opt => (
+                                                  <button
+                                                      key={opt}
+                                                      onClick={() => setPrt20Answers(prev => ({...prev, [item.id]: opt}))}
+                                                      className={`px-4 py-2 rounded-lg border text-sm font-bold transition-all shadow-sm
+                                                          ${prt20Answers[item.id] === opt 
+                                                              ? 'bg-blue-600 text-white border-blue-600 ring-2 ring-blue-200' 
+                                                              : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300'}`}
+                                                  >
+                                                      {opt}
+                                                  </button>
+                                              ))}
+                                          </div>
+                                      )}
+
+                                      {item.type === 'number' && (
+                                          <input 
+                                              type="number" 
+                                              min="0" 
+                                              max="50"
+                                              value={prt20Answers[item.id] || ''}
+                                              onChange={(e) => setPrt20Answers(prev => ({...prev, [item.id]: Number(e.target.value)}))}
+                                              className="w-24 p-2 text-center bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                                              placeholder="#"
+                                          />
+                                      )}
+                                  </div>
+                              </div>
+                          ))}
+                      </div>
+
+                      <div className="mt-8 flex justify-end">
+                           <button 
+                              onClick={handlePrt20Submit}
+                              className="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200"
+                           >
+                              Calculate Score
+                           </button>
+                      </div>
+                  </>
+              ) : (
+                  <div className="text-center py-12">
+                       <div className="inline-block p-4 rounded-full bg-blue-50 text-blue-600 mb-4">
+                           <Icons.Clipboard />
+                       </div>
+                       <h3 className="text-2xl font-bold text-gray-800 mb-2">Questionnaire Completed</h3>
+                       <p className="text-gray-500 mb-8">Your responses have been recorded and saved to history.</p>
+                       
+                       <div className="max-w-xs mx-auto bg-gray-50/50 p-6 rounded-xl border border-gray-200 mb-8">
+                           <span className="text-gray-500 text-xs uppercase font-bold tracking-wider">Symptom Burden Score</span>
+                           <div className="text-5xl font-bold text-gray-900 my-2">{prt20Result?.totalScore.toFixed(0)}</div>
+                           <div className={`text-sm font-bold ${
+                               (prt20Result?.totalScore || 0) < 30 ? 'text-green-600' :
+                               (prt20Result?.totalScore || 0) < 60 ? 'text-yellow-600' : 'text-red-600'
+                           }`}>
+                               {(prt20Result?.totalScore || 0) < 30 ? 'Low Burden' :
+                                (prt20Result?.totalScore || 0) < 60 ? 'Moderate Burden' : 'High Burden'}
+                           </div>
+                       </div>
+
+                       <button 
+                           onClick={resetPrt20}
+                           className="text-gray-500 underline hover:text-gray-800 text-sm"
+                       >
+                           Submit another assessment
+                       </button>
+                  </div>
+              )}
+          </div>
+      )}
+
       {activeTab === 'history' && (
         <div className="space-y-4">
              {history.length === 0 ? (
-                 <div className="bg-white p-12 rounded-xl shadow-sm border border-gray-100 text-center">
+                 <div className="bg-white/70 backdrop-blur-xl p-12 rounded-xl shadow-sm border border-white/50 text-center">
                      <div className="text-4xl mb-4 text-gray-300">📊</div>
                      <p className="text-gray-500">No history records found. Please submit a report first.</p>
                  </div>
              ) : (
-                 history.map((record) => (
-                     <div key={record.id} className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between hover:shadow-md transition-shadow">
-                         <div className="flex items-center space-x-4 mb-4 md:mb-0">
-                             <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-mono text-sm font-bold">
-                                 {record.date}
+                 history.map((record) => {
+                     // Determine if this is a PRT20 record or a General record
+                     if (record.type === 'prt20') {
+                         const score = (record as Prt20Record).totalScore;
+                         const severity = score < 30 ? 'Low' : score < 60 ? 'Moderate' : 'High';
+                         const severityColor = score < 30 ? 'text-green-600 bg-green-50' : score < 60 ? 'text-yellow-600 bg-yellow-50' : 'text-red-600 bg-red-50';
+
+                         return (
+                             <div key={record.id} className="bg-white/70 backdrop-blur-xl p-5 rounded-xl shadow-sm border border-white/50 flex flex-col md:flex-row md:items-center justify-between hover:shadow-md transition-shadow">
+                                 <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                                     <div className="bg-blue-100 text-blue-700 px-3 py-1 rounded-lg font-mono text-sm font-bold">
+                                         {record.date}
+                                     </div>
+                                     <div>
+                                         <p className="font-bold text-gray-800">QLQ-PRT20 Questionnaire</p>
+                                         <p className="text-xs text-gray-500">ID: {record.id}</p>
+                                     </div>
+                                 </div>
+                                 
+                                 <div className="flex items-center space-x-6 text-sm">
+                                     <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Total Score</span>
+                                         <span className="font-bold text-gray-800 text-lg">{score.toFixed(0)}</span>
+                                     </div>
+                                     <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Burden Level</span>
+                                         <span className={`px-2 py-1 rounded-md text-xs font-bold ${severityColor}`}>
+                                             {severity}
+                                         </span>
+                                     </div>
+                                 </div>
                              </div>
-                             <div>
-                                 <p className="font-bold text-gray-800">Summary</p>
-                                 <p className="text-xs text-gray-500">ID: {record.id}</p>
+                         );
+                     } else {
+                         // General Report
+                         const genRecord = record as EproRecord;
+                         return (
+                             <div key={genRecord.id} className="bg-white/70 backdrop-blur-xl p-5 rounded-xl shadow-sm border border-white/50 flex flex-col md:flex-row md:items-center justify-between hover:shadow-md transition-shadow">
+                                 <div className="flex items-center space-x-4 mb-4 md:mb-0">
+                                     <div className="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg font-mono text-sm font-bold">
+                                         {genRecord.date}
+                                     </div>
+                                     <div>
+                                         <p className="font-bold text-gray-800">Symptom Report</p>
+                                         <p className="text-xs text-gray-500">ID: {genRecord.id}</p>
+                                     </div>
+                                 </div>
+                                 
+                                 <div className="flex items-center space-x-6 text-sm">
+                                     <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Bleeding</span>
+                                         <span className={`font-bold ${genRecord.bleeding === 'none' ? 'text-green-600' : 'text-red-600'}`}>
+                                             {getBleedingLabel(genRecord.bleeding)}
+                                         </span>
+                                     </div>
+                                     <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Pain</span>
+                                         <span className="font-bold text-gray-800">{genRecord.pain}/10</span>
+                                     </div>
+                                     <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Urgency</span>
+                                         <span className="font-bold text-gray-800">{genRecord.urgency}/10</span>
+                                     </div>
+                                      <div className="text-center">
+                                         <span className="block text-gray-400 text-xs">Freq</span>
+                                         <span className="font-bold text-gray-800">{genRecord.frequency}</span>
+                                     </div>
+                                 </div>
                              </div>
-                         </div>
-                         
-                         <div className="flex items-center space-x-6 text-sm">
-                             <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">Bleeding</span>
-                                 <span className={`font-bold ${record.bleeding === 'none' ? 'text-green-600' : 'text-red-600'}`}>
-                                     {getBleedingLabel(record.bleeding)}
-                                 </span>
-                             </div>
-                             <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">Pain</span>
-                                 <span className="font-bold text-gray-800">{record.pain}/10</span>
-                             </div>
-                             <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">Urgency</span>
-                                 <span className="font-bold text-gray-800">{record.urgency}/10</span>
-                             </div>
-                              <div className="text-center">
-                                 <span className="block text-gray-400 text-xs">Freq</span>
-                                 <span className="font-bold text-gray-800">{record.frequency}</span>
-                             </div>
-                         </div>
-                     </div>
-                 ))
+                         );
+                     }
+                 })
              )}
         </div>
       )}
@@ -666,35 +883,35 @@ const DashboardView = ({
     <div className="space-y-6 animate-fade-in">
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-400 uppercase">Monthly Assessments</p>
             <p className="text-3xl font-bold text-gray-900 mt-1">{MOCK_DASHBOARD_STATS.monthlyAssessments}</p>
             <p className="text-xs text-green-500 mt-2 font-medium">↑ 12% vs last month</p>
           </div>
-          <div className="p-3 bg-blue-50 rounded-lg text-medical-600"><Icons.Assessment /></div>
+          <div className="p-3 bg-blue-50/50 rounded-lg text-medical-600"><Icons.Assessment /></div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-400 uppercase">Avg Risk Score</p>
             <p className="text-3xl font-bold text-gray-900 mt-1">{MOCK_DASHBOARD_STATS.avgRiskScore}</p>
             <p className="text-xs text-gray-500 mt-2">Stable</p>
           </div>
-          <div className="p-3 bg-indigo-50 rounded-lg text-indigo-600"><Icons.Activity /></div>
+          <div className="p-3 bg-indigo-50/50 rounded-lg text-indigo-600"><Icons.Activity /></div>
         </div>
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex items-center justify-between">
           <div>
             <p className="text-sm font-medium text-gray-400 uppercase">Critical Alerts</p>
             <p className="text-3xl font-bold text-red-600 mt-1">{MOCK_DASHBOARD_STATS.criticalCases}</p>
             <p className="text-xs text-red-400 mt-2 font-medium">Action Required</p>
           </div>
-          <div className="p-3 bg-red-50 rounded-lg text-red-600"><Icons.Alert /></div>
+          <div className="p-3 bg-red-50/50 rounded-lg text-red-600"><Icons.Alert /></div>
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Risk Distribution */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
           <h3 className="text-lg font-bold text-gray-800 mb-6">Department Risk Distribution</h3>
           <div className="space-y-4">
             {MOCK_DASHBOARD_STATS.riskDistribution.map((item) => (
@@ -703,7 +920,7 @@ const DashboardView = ({
                   <span className="font-medium text-gray-700">{item.label} Risk</span>
                   <span className="text-gray-500">{item.value}%</span>
                 </div>
-                <div className="w-full bg-gray-100 rounded-full h-2.5">
+                <div className="w-full bg-gray-100/50 rounded-full h-2.5">
                   <div className={`h-2.5 rounded-full ${item.color}`} style={{ width: `${item.value}%` }}></div>
                 </div>
               </div>
@@ -712,23 +929,23 @@ const DashboardView = ({
         </div>
 
         {/* Action List */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex flex-col">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex flex-col">
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-gray-800">Recent Critical Cases</h3>
             <button onClick={onViewAllHistory} className="text-xs text-medical-600 font-medium hover:underline">View All</button>
           </div>
           <div className="flex-1 overflow-auto space-y-3">
              {MOCK_HISTORY_DATA.filter(p => p.level === 'Critical' || p.level === 'High').slice(0, 4).map((p, i) => (
-               <div key={i} className="flex items-center justify-between p-3 bg-red-50 border border-red-100 rounded-lg">
+               <div key={i} className="flex items-center justify-between p-3 bg-red-50/50 border border-red-100 rounded-lg">
                  <div>
                    <p className="text-sm font-bold text-gray-800">{p.id}</p>
                    <p className="text-xs text-gray-500">{p.treatment} • {p.date}</p>
                  </div>
                  <div className="flex items-center space-x-2">
-                    <span className="px-2 py-1 bg-red-200 text-red-800 text-xs rounded-full font-bold">{p.level}</span>
+                    <span className="px-2 py-1 bg-red-200/50 text-red-800 text-xs rounded-full font-bold">{p.level}</span>
                     <button 
                         onClick={() => onViewHistoryItem(p)}
-                        className="p-1 hover:bg-red-200 rounded text-red-700"
+                        className="p-1 hover:bg-red-200/50 rounded text-red-700"
                     >
                         <Icons.Dashboard />
                     </button>
@@ -758,7 +975,7 @@ const HistoryView = ({ onViewItem }: { onViewItem: (item: any) => void }) => {
 
   return (
     <div className="space-y-6 animate-fade-in">
-      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white/70 backdrop-blur-xl rounded-xl shadow-sm border border-white/50 overflow-hidden">
         <div className="p-6 border-b border-gray-100 flex justify-between items-center">
           <h3 className="text-lg font-bold text-gray-800">Assessment History</h3>
           <div className="relative">
@@ -767,14 +984,14 @@ const HistoryView = ({ onViewItem }: { onViewItem: (item: any) => void }) => {
                 placeholder="Search Patient ID..." 
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-8 pr-4 py-2 bg-gray-50 border border-gray-200 text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-medical-500" 
+                className="pl-8 pr-4 py-2 bg-white/50 border border-gray-200 text-gray-900 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-medical-500" 
              />
              <svg className="w-4 h-4 text-gray-400 absolute left-2.5 top-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
           </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-left">
-            <thead className="bg-gray-50 text-gray-500 text-xs uppercase">
+            <thead className="bg-gray-50/50 text-gray-500 text-xs uppercase">
               <tr>
                 <th className="px-6 py-4 font-medium">Patient ID</th>
                 <th className="px-6 py-4 font-medium">Date</th>
@@ -787,7 +1004,7 @@ const HistoryView = ({ onViewItem }: { onViewItem: (item: any) => void }) => {
             </thead>
             <tbody className="divide-y divide-gray-100">
               {filteredData.length > 0 ? filteredData.map((row, idx) => (
-                <tr key={idx} className="hover:bg-gray-50 transition-colors">
+                <tr key={idx} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-6 py-4 font-medium text-gray-900">{row.id}</td>
                   <td className="px-6 py-4 text-gray-600 text-sm">{row.date}</td>
                   <td className="px-6 py-4 text-gray-600 text-sm">{row.age}</td>
@@ -821,7 +1038,7 @@ const HistoryView = ({ onViewItem }: { onViewItem: (item: any) => void }) => {
             </tbody>
           </table>
         </div>
-        <div className="p-4 bg-gray-50 border-t border-gray-100 text-center text-xs text-gray-500">
+        <div className="p-4 bg-gray-50/50 border-t border-gray-100 text-center text-xs text-gray-500">
           Showing {filteredData.length} records. Connect database for full history.
         </div>
       </div>
@@ -834,7 +1051,7 @@ const SettingsView = ({ darkMode, setDarkMode }: { darkMode: boolean, setDarkMod
 
     return (
         <div className="max-w-3xl mx-auto space-y-6 animate-fade-in">
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
                 <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">General Settings</h3>
                 
                 <div className="space-y-6">
@@ -866,7 +1083,7 @@ const SettingsView = ({ darkMode, setDarkMode }: { darkMode: boolean, setDarkMod
                 </div>
             </div>
 
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
                 <h3 className="text-lg font-bold text-gray-800 mb-6 border-b pb-4">System Integration</h3>
                 <div className="space-y-4">
                     <div>
@@ -936,7 +1153,7 @@ const AssessmentView = ({
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Patient Demographics */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Patient Demographics</h3>
           <div className="space-y-4">
             <div>
@@ -973,7 +1190,7 @@ const AssessmentView = ({
         </div>
 
         {/* Treatment Details */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Treatment Parameters</h3>
           <div className="space-y-4">
             <div>
@@ -1010,7 +1227,7 @@ const AssessmentView = ({
         </div>
 
         {/* Clinical Details */}
-        <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 md:col-span-2">
+        <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 md:col-span-2">
           <h3 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Clinical Details</h3>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1019,12 +1236,12 @@ const AssessmentView = ({
                <label className="block text-sm font-medium text-gray-700 mb-3">Comorbidities</label>
                <div className="space-y-2">
                  {COMORBIDITY_OPTIONS.map(opt => (
-                   <label key={opt} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 transition">
+                   <label key={opt} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50/50 rounded border border-transparent hover:border-gray-200 transition">
                      <input 
                       type="checkbox" 
                       checked={data.comorbidities.includes(opt)}
                       onChange={() => toggleArrayItem('comorbidities', opt)}
-                      className="w-4 h-4 text-medical-600 rounded focus:ring-medical-500 border-gray-300 bg-gray-50"
+                      className="w-4 h-4 text-medical-600 rounded focus:ring-medical-500 border-gray-300 bg-gray-50/50"
                      />
                      <span className="text-sm text-gray-700">{opt}</span>
                    </label>
@@ -1040,12 +1257,12 @@ const AssessmentView = ({
                </label>
                <div className="space-y-2">
                  {GENOMIC_OPTIONS.map(opt => (
-                   <label key={opt} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50 rounded border border-transparent hover:border-gray-200 transition">
+                   <label key={opt} className="flex items-center space-x-2 cursor-pointer p-2 hover:bg-gray-50/50 rounded border border-transparent hover:border-gray-200 transition">
                      <input 
                       type="checkbox" 
                       checked={data.genomicMarkers.includes(opt)}
                       onChange={() => toggleArrayItem('genomicMarkers', opt)}
-                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 border-gray-300 bg-gray-50"
+                      className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500 border-gray-300 bg-gray-50/50"
                      />
                      <span className="text-sm text-gray-700">{opt}</span>
                    </label>
@@ -1110,7 +1327,7 @@ const ResultView = ({
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Patient Header */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 flex justify-between items-center">
+      <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-blue-900">Patient: 陳大明 (Chen, Da-Ming)</h1>
             <p className="text-gray-500 mt-1 text-sm font-medium">ID: {patientId} | Date of Birth: 1956/05/15</p>
@@ -1121,7 +1338,7 @@ const ResultView = ({
       </div>
 
       {/* Tabs Navigation */}
-      <div className="relative flex space-x-1 bg-white p-1 rounded-lg border border-gray-200 w-fit shadow-sm">
+      <div className="relative flex space-x-1 bg-white/60 backdrop-blur-md p-1 rounded-lg border border-white/40 w-fit shadow-sm">
          {/* Animated Glider */}
          <div 
             className="absolute top-1 bottom-1 bg-medical-600 rounded-md transition-all duration-300 ease-out shadow-sm"
@@ -1134,7 +1351,7 @@ const ResultView = ({
                 ref={el => { tabsRef.current[index] = el; }}
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`relative z-10 px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 
-                    ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}`}
+                    ${activeTab === tab.id ? 'text-white' : 'text-gray-600 hover:bg-white/40 hover:text-gray-900'}`}
              >
                  <tab.icon />
                  <span>{tab.label}</span>
@@ -1143,7 +1360,7 @@ const ResultView = ({
       </div>
 
       {/* Tab Content */}
-      <div className="bg-white p-8 rounded-xl shadow-sm border border-gray-100 min-h-[500px]">
+      <div className="bg-white/70 backdrop-blur-xl p-8 rounded-xl shadow-sm border border-white/50 min-h-[500px]">
         {activeTab === 'dashboard' && (
             <div className="space-y-8 animate-fade-in">
                 <div className="flex flex-col md:flex-row justify-around items-center gap-8 py-8">
@@ -1156,7 +1373,7 @@ const ResultView = ({
                         <span className="text-yellow-500 mr-2">💡</span>
                         Clinical Decision Support (CDS)
                     </h3>
-                    <div className={`p-4 rounded-lg border-l-4 ${result.riskLevel === 'Low' ? 'bg-green-50 border-green-500' : 'bg-yellow-50 border-yellow-500'}`}>
+                    <div className={`p-4 rounded-lg border-l-4 ${result.riskLevel === 'Low' ? 'bg-green-50/50 border-green-500' : 'bg-yellow-50/50 border-yellow-500'}`}>
                          <p className={`font-bold text-lg ${result.riskLevel === 'Low' ? 'text-green-800' : 'text-yellow-800'}`}>
                              {result.riskLevel === 'Low' 
                                 ? '✓ Low Risk: Recommend standard monitoring protocol.' 
@@ -1208,13 +1425,13 @@ const ResultView = ({
 
                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
                      {/* Chart Section - Takes up 2 columns on large screens for size */}
-                     <div className="lg:col-span-2 flex justify-center bg-gray-50/50 rounded-2xl p-4 border border-gray-100">
+                     <div className="lg:col-span-2 flex justify-center bg-gray-50/30 rounded-2xl p-4 border border-gray-100">
                          <RadarChart data={result.radarData} />
                      </div>
                      
                      {/* Info Section */}
                      <div className="space-y-6">
-                         <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
+                         <div className="bg-white/50 border border-gray-200 rounded-xl p-6 shadow-sm">
                              <h4 className="font-bold text-gray-900 text-lg flex items-center mb-4">
                                  <span className="w-1 h-6 bg-yellow-500 rounded mr-3"></span>
                                  Key Risk Drivers
@@ -1227,7 +1444,7 @@ const ResultView = ({
                                             <span className="capitalize text-gray-600 font-medium text-sm">{key}</span>
                                             <span className="font-bold text-gray-900">{Math.round(val)}%</span>
                                          </div>
-                                         <div className="w-full bg-gray-100 rounded-full h-1.5">
+                                         <div className="w-full bg-gray-100/50 rounded-full h-1.5">
                                             <div 
                                                 className={`h-1.5 rounded-full ${val > 50 ? 'bg-orange-500' : 'bg-blue-400'}`} 
                                                 style={{ width: `${val}%` }}
@@ -1238,7 +1455,7 @@ const ResultView = ({
                              </ul>
                          </div>
 
-                         <div className="bg-green-50 border border-green-100 rounded-xl p-6 flex items-start space-x-4">
+                         <div className="bg-green-50/50 border border-green-100 rounded-xl p-6 flex items-start space-x-4">
                              <div className="w-10 h-10 bg-green-100 text-green-600 rounded-full flex-shrink-0 flex items-center justify-center">
                                  <Icons.Check />
                              </div>
@@ -1259,7 +1476,7 @@ const ResultView = ({
                  <h3 className="text-xl font-bold text-gray-800 mb-4">Clinical Report Preview</h3>
                  <p className="text-sm text-gray-500 mb-6">Generated automated report for EMR integration.</p>
 
-                 <div className="bg-gray-50 p-6 rounded-lg border border-gray-200 font-mono text-sm text-gray-700 whitespace-pre-wrap leading-relaxed shadow-inner">
+                 <div className="bg-gray-50/50 p-6 rounded-lg border border-gray-200 font-mono text-sm text-gray-700 whitespace-pre-wrap leading-relaxed shadow-inner">
 {`# RadShield AI - Patient Risk Report
 **Patient:** 陳大明 (Chen, Da-Ming) (${patientId})
 **Date:** ${new Date().toISOString().split('T')[0]}
@@ -1409,8 +1626,8 @@ function App() {
   return (
     <div className={`min-h-screen bg-slate-50 flex font-sans text-slate-800 ${darkMode ? 'dark' : ''}`}>
       {/* Sidebar */}
-      <div className="w-64 bg-white border-r border-gray-200 flex flex-col fixed h-full z-10">
-        <div className="p-6 border-b border-gray-100">
+      <div className="w-64 bg-white/70 backdrop-blur-xl border-r border-white/50 flex flex-col fixed h-full z-10 shadow-lg shadow-blue-900/5">
+        <div className="p-6 border-b border-white/20">
           <div className="flex items-center space-x-3">
             <Icons.RadShieldLogo />
             <span className="text-2xl font-bold text-gray-900 tracking-tight">RadShield</span>
@@ -1420,7 +1637,7 @@ function App() {
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto relative">
             {/* Animated Glider */}
             <div 
-                className="absolute left-4 right-4 bg-medical-100 border-r-4 border-medical-600 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0"
+                className="absolute left-4 right-4 bg-medical-100/50 backdrop-blur-sm border-r-4 border-medical-600 rounded-lg transition-all duration-300 ease-out pointer-events-none z-0"
                 style={{ 
                     top: sidebarGlider.top, 
                     height: sidebarGlider.height, 
@@ -1441,16 +1658,16 @@ function App() {
         </nav>
 
         {/* User Profile / Menu */}
-        <div className="p-4 border-t border-gray-100 relative" ref={userMenuRef}>
+        <div className="p-4 border-t border-white/20 relative" ref={userMenuRef}>
           <button 
             onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-            className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-gray-50 transition-colors"
+            className="flex items-center space-x-3 w-full p-2 rounded-lg hover:bg-white/40 transition-colors"
           >
             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-bold text-gray-500">
               DR
             </div>
             <div className="flex-1 text-left">
-              <p className="text-sm font-medium text-gray-900">Dr. Smith</p>
+              <p className="text-sm font-medium text-gray-900">Dr. Wang</p>
               <p className="text-xs text-gray-400">Oncologist</p>
             </div>
             <div className={`text-gray-400 transition-transform ${isUserMenuOpen ? 'rotate-180' : ''}`}>
@@ -1460,22 +1677,22 @@ function App() {
 
           {/* Popover Menu */}
           {isUserMenuOpen && (
-            <div className="absolute bottom-full left-4 right-4 mb-2 bg-white rounded-xl shadow-xl border border-gray-100 py-1 z-50 animate-fade-in-up origin-bottom">
+            <div className="absolute bottom-full left-4 right-4 mb-2 bg-white/80 backdrop-blur-xl rounded-xl shadow-xl border border-white/40 py-1 z-50 animate-fade-in-up origin-bottom">
                 <button 
                     onClick={() => { alert('Switch User functionality would open auth dialog.'); setIsUserMenuOpen(false); }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-medical-600 flex items-center space-x-2"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/50 hover:text-medical-600 flex items-center space-x-2"
                 >
                     <Icons.User /> <span>Switch User</span>
                 </button>
                 <button 
                     onClick={() => { setDarkMode(!darkMode); setIsUserMenuOpen(false); }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-medical-600 flex items-center space-x-2"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/50 hover:text-medical-600 flex items-center space-x-2"
                 >
                     <Icons.Moon /> <span>Appearance</span>
                 </button>
                  <button 
                     onClick={() => { setView('settings'); setShowResult(false); setIsUserMenuOpen(false); }}
-                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-medical-600 flex items-center space-x-2"
+                    className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-white/50 hover:text-medical-600 flex items-center space-x-2"
                 >
                     <Icons.Settings /> <span>Settings</span>
                 </button>

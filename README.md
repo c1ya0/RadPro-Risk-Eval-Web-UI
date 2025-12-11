@@ -10,31 +10,23 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 1. Department Dashboard
 *A high-level overview of department statistics, recent critical cases, and risk distribution.*
-<img width="1298" height="781" alt="2025-11-24_20-47" src="https://github.com/user-attachments/assets/4fb06012-cfbd-42f6-919a-b05552c60260" />
-
+![Department Dashboard](docs/images/dashboard_preview.png)
 
 ### 2. AI Risk Assessment Form
 *Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
-<img width="1288" height="781" alt="2025-11-24_20-49" src="https://github.com/user-attachments/assets/def1fa9d-383d-4c03-8806-a9dcd3355967" />
-
+![Risk Assessment Form](docs/images/assessment_form.png)
 
 ### 3. Analysis Results & Clinical Decision Support
 *Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
-<img width="1287" height="778" alt="2025-11-24_20-50" src="https://github.com/user-attachments/assets/b9863a54-eceb-4c56-b770-5c72b1013932" />
-<img width="1288" height="782" alt="2025-11-24_20-50_1" src="https://github.com/user-attachments/assets/65b8e9b2-3ded-41d5-b8be-108af2d4a35c" />
-<img width="1286" height="781" alt="2025-11-24_20-51" src="https://github.com/user-attachments/assets/fb315030-5866-4afb-a286-8f5a4d9443ae" />
-<img width="1290" height="781" alt="2025-11-24_20-51_1" src="https://github.com/user-attachments/assets/1e23734b-c31a-4afc-b4c1-a4a28ae150a2" />
-
+![Analysis Results](docs/images/results_view.png)
 
 ### 4. ePRO System (Patient View)
-*Mobile-responsive interface for patients to report symptoms like bleeding, pain, and urgency.*
-<img width="1299" height="778" alt="2025-11-24_20-52" src="https://github.com/user-attachments/assets/6dbbe374-1f43-4bd3-93cb-b1799d53925a" />
-
+*Mobile-responsive interface for patients to report symptoms and complete standardized questionnaires (QLQ-PRT20).*
+![ePRO System](docs/images/epro_system.png)
 
 ### 5. Gemini Medical Assistant
 *Integrated chatbot for real-time medical queries and data interpretation.*
-<img width="363" height="590" alt="2025-11-24_20-52_1" src="https://github.com/user-attachments/assets/7531e8ea-e46f-43e3-ac7e-c4b55097989f" />
-
+![Gemini Chat Widget](docs/images/chat_widget.png)
 
 ---
 
@@ -55,8 +47,10 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 3. **ePRO System (Patient Reported Outcomes)**
 *   **Integrated Patient Portal**: A dedicated interface for patients to report symptoms directly.
-*   **Symptom Tracking**: Tracks Rectal Bleeding status, Pain Index (0-10), Urgency, and Stool Frequency.
-*   **Longitudinal History**: Visualizes symptom trends over time to help clinicians identify progression early.
+*   **Standardized Questionnaires**: Fully integrated **EORTC QLQ-PRT20** (European Organization for Research and Treatment of Cancer) module for standardized quality-of-life assessment.
+*   **Symptom Scoring**: Automatically calculates normalized Symptom Burden Scores (0-100) based on patient responses to the 21-item questionnaire.
+*   **General Symptom Tracking**: Tracks Rectal Bleeding status, Pain Index (0-10), Urgency, and Stool Frequency.
+*   **Longitudinal History**: Visualizes trends for both general symptoms and standardized QLQ-PRT20 scores to help clinicians identify progression early.
 
 ### 4. **Clinical Decision Support (CDS)**
 *   **Automated Reasoning**: The AI generates human-readable reasoning for every risk score.
@@ -115,7 +109,7 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 *   **`App.tsx`**: Main application logic, routing (Dashboard/Assessment/History/ePRO), and view components.
 *   **`services.ts`**: Handles interaction with the Google Gemini API, including prompt engineering and JSON schema validation.
 *   **`types.ts`**: TypeScript definitions for Patient Data, Risk Models, and ePRO records.
-*   **`constants.ts`**: Mock data for history, dashboard statistics, and configuration options.
+*   **`constants.ts`**: Mock data for history, dashboard statistics, questionnaires, and configuration options.
 *   **`index.html`**: Root HTML file containing Tailwind CSS CDN and font configurations.
 
 ---
