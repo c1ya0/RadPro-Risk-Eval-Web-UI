@@ -28,7 +28,7 @@ export const GENOMIC_OPTIONS = [
   "BRCA1/2 Mutation",
   "TGFB1 Polymorphism",
   "XRCC1 Variant",
-  "MLH1/MSH2 (Lynch Syndrome)",
+  "MLH1/MSH2 mutation",
   "TP53 Mutation"
 ];
 

@@ -38,7 +38,8 @@ const Icons = {
   Upload: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>,
   Sparkles: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" /></svg>,
   Send: () => <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>,
-  X: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+  X: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>,
+  Camera: () => <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
 };
 
 // --- Shared Styles ---
@@ -71,13 +72,8 @@ const ChatWidget = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const chatSessionRef = useRef<Chat | null>(null);
-
-  useEffect(() => {
-    if (!chatSessionRef.current) {
-      chatSessionRef.current = createMedicalChatSession();
-    }
-  }, []);
+  
+  // Offline / Demo Mode - no live chat session ref
 
   useEffect(() => {
     if (isOpen) {
@@ -90,7 +86,7 @@ const ChatWidget = () => {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || !chatSessionRef.current) return;
+    if (!input.trim()) return;
 
     const userMsg: ChatMessage = {
       id: Date.now().toString(),
@@ -103,30 +99,25 @@ const ChatWidget = () => {
     setInput('');
     setIsLoading(true);
 
-    try {
-      const result = await chatSessionRef.current.sendMessageStream({ message: userMsg.text });
-      
-      let fullResponse = "";
-      const botMsgId = (Date.now() + 1).toString();
-      
-      // Add initial placeholder for streaming
-      setMessages(prev => [...prev, { id: botMsgId, role: 'model', text: '', timestamp: Date.now() }]);
-
-      for await (const chunk of result) {
-        const c = chunk as GenerateContentResponse;
-        if (c.text) {
-          fullResponse += c.text;
-          setMessages(prev => prev.map(msg => 
-            msg.id === botMsgId ? { ...msg, text: fullResponse } : msg
-          ));
-        }
-      }
-    } catch (error) {
-      console.error("Chat Error", error);
-      setMessages(prev => [...prev, { id: Date.now().toString(), role: 'model', text: "I apologize, but I'm having trouble connecting to the service right now.", timestamp: Date.now() }]);
-    } finally {
-      setIsLoading(false);
-    }
+    // DEMO MODE: Simulate response
+    setTimeout(() => {
+        const demoResponses = [
+            "Based on the current guidelines, acute toxicity grade 2 or higher requires immediate intervention.",
+            "I can help you interpret the radar chart. The high 'Genomics' score indicates a genetic predisposition to radiation sensitivity.",
+            "The patient's risk percentile is 87.4%, which is significantly higher than the average population.",
+            "Would you like me to generate a referral letter for a gastroenterologist?",
+            "Please check the clinical notes for any mention of anticoagulant use, as this is a key risk factor."
+        ];
+        const randomResponse = demoResponses[Math.floor(Math.random() * demoResponses.length)];
+        
+        setMessages(prev => [...prev, { 
+            id: (Date.now() + 1).toString(), 
+            role: 'model', 
+            text: `[Demo Mode] ${randomResponse}`, 
+            timestamp: Date.now() 
+        }]);
+        setIsLoading(false);
+    }, 1500);
   };
 
   return (
@@ -180,7 +171,7 @@ const ChatWidget = () => {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                placeholder="Ask Gemini..."
+                placeholder="Ask Gemini (Demo)..."
                 className="w-full pl-4 pr-10 py-2.5 bg-gray-100/50 border-transparent focus:bg-white focus:border-medical-500 rounded-xl text-sm focus:ring-0 transition-all"
                 disabled={isLoading}
               />
@@ -391,6 +382,7 @@ const EproView = () => {
   const [urgency, setUrgency] = useState<number>(0);
   const [frequency, setFrequency] = useState<number>(1);
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isAnalyzingPhoto, setIsAnalyzingPhoto] = useState(false);
   
   // Update state to hold mixed record types
   const [history, setHistory] = useState<HistoryItem[]>([
@@ -439,6 +431,18 @@ const EproView = () => {
         setIsSubmitted(false);
         setActiveTab('history');
     }, 1500);
+  };
+
+  const handleMockPhotoAnalysis = () => {
+    setIsAnalyzingPhoto(true);
+    
+    // Simulate AI Processing time
+    setTimeout(() => {
+        setIsAnalyzingPhoto(false);
+        // Mock result: Mild bleeding detected
+        setBleeding('mild');
+        alert("Photo Analysis Complete: 'Mild' bleeding indicators detected.");
+    }, 3000);
   };
 
   const handlePrt20Submit = () => {
@@ -529,7 +533,16 @@ const EproView = () => {
         <div className="space-y-6">
 
           {/* Section 1: Bleeding Status */}
-          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50">
+          <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 relative overflow-hidden">
+             {/* Simulated Overlay for Photo Analysis */}
+             {isAnalyzingPhoto && (
+                 <div className="absolute inset-0 bg-white/90 z-20 flex flex-col items-center justify-center backdrop-blur-sm animate-fade-in">
+                     <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4"></div>
+                     <p className="text-blue-900 font-bold animate-pulse">Analyzing Stool Sample...</p>
+                     <p className="text-sm text-gray-500">Detecting color and consistency patterns</p>
+                 </div>
+             )}
+
              <div className="flex justify-between items-center mb-6">
                  <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-xl">🩸</div>
@@ -537,6 +550,16 @@ const EproView = () => {
                         <span className="font-bold text-gray-800 text-lg block">Rectal Bleeding Status</span>
                     </div>
                  </div>
+                 
+                 {/* Camera Button Mock */}
+                 <button 
+                    onClick={handleMockPhotoAnalysis}
+                    className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors border border-gray-200"
+                    title="Simulate taking a photo for AI analysis"
+                 >
+                     <Icons.Camera />
+                     <span>Take a photo</span>
+                 </button>
              </div>
              
              <div className="grid grid-cols-3 gap-4">
@@ -557,6 +580,11 @@ const EproView = () => {
                      </button>
                  ))}
              </div>
+             
+             {/* Info Text */}
+             <p className="text-xs text-gray-400 mt-4 text-right italic">
+                 * You can use the "Take a photo" feature to let RadShield AI suggest a status.
+             </p>
           </div>
 
           {/* Section 2: Sliders (Pain & Urgency) */}
@@ -1329,7 +1357,7 @@ const ResultView = ({
       {/* Patient Header */}
       <div className="bg-white/70 backdrop-blur-xl p-6 rounded-xl shadow-sm border border-white/50 flex justify-between items-center">
           <div>
-            <h1 className="text-3xl font-bold text-blue-900">Patient: 陳大明 (Chen, Da-Ming)</h1>
+            <h1 className="text-3xl font-bold text-blue-900">陳大明 (Chen, Da-Ming)</h1>
             <p className="text-gray-500 mt-1 text-sm font-medium">ID: {patientId} | Date of Birth: 1956/05/15</p>
           </div>
           <button onClick={onBack} className="text-medical-600 hover:text-medical-900 font-medium text-sm">
