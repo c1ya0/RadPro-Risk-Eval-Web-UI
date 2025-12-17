@@ -13,19 +13,19 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 ![Department Dashboard](docs/images/dashboard_preview.png)
 
 ### 2. AI Risk Assessment Form
-*Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
+*Structured clinical intake form integrating demographics, dosimetry, and AI-suggested clinical notes.*
 ![Risk Assessment Form](docs/images/assessment_form.png)
 
 ### 3. Analysis Results & Clinical Decision Support
-*Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
+*Comprehensive risk report featuring risk dashboard, population risk positioning, risk radar analysis, clinical report preview.*
 ![Analysis Results](docs/images/results_view.png)
 
 ### 4. ePRO System (Patient View)
-*Mobile-responsive interface for patients to report symptoms and complete standardized questionnaires (QLQ-PRT20).*
+*Web/Mobile-responsive interface for patients to report symptoms (patient reported outcome) and complete standardized questionnaires (QLQ-PRT20).*
 ![ePRO System](docs/images/epro_system.png)
 
-### 5. Gemini Medical Assistant
-*Integrated chatbot for real-time medical queries and data interpretation.*
+### 5. Gemini Medical Suggestions
+*Integrated chatbot for real-time medical queries and data interpretation (API-key required).*
 ![Gemini Chat Widget](docs/images/chat_widget.png)
 
 ---
@@ -33,7 +33,7 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 ## 🌟 Key Features
 
 ### 1. **Intelligent Risk Assessment**
-*   **AI-Powered Analysis**: Utilizes **Google Gemini 2.5 Flash** to analyze structured data (Dosimetry, Demographics) and unstructured text (Clinical Notes, Genomic Markers).
+*   **AI-Powered Analysis**: Integrates **Google Gemini** to analyze structured data (Dosimetry, Demographics) and unstructured text (Clinical Notes, Genomic Markers).
 *   **Dual-Risk Scoring**: Calculates distinct probability scores for **Acute Toxicity** (0-3 months) and **Late Toxicity** (>6 months).
 *   **Multi-Dimensional Radar**: Visualizes risk contributions across 5 key axes: Genomics, Dosimetry, Age, Medications, and Comorbidities.
 
