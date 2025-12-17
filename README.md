@@ -15,24 +15,24 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 2. AI Risk Assessment Form
 *Structured clinical intake form integrating demographics, dosimetry, and AI-suggested clinical notes.*
-![Risk Assessment Form](<img width="1496" height="992" alt="risk assessment" src="https://github.com/user-attachments/assets/c2321f5d-6d31-4e51-a6f6-4eb033bfc97e" />)
+<img width="1496" height="992" alt="risk assessment" src="https://github.com/user-attachments/assets/c2321f5d-6d31-4e51-a6f6-4eb033bfc97e" />
 
 ### 3. Analysis Results & Clinical Decision Support
 *Comprehensive risk report featuring risk dashboard, population risk positioning, risk radar analysis, clinical report preview.*
-![Analysis Results](<img width="1265" height="791" alt="risk dashboard" src="https://github.com/user-attachments/assets/cef70ba1-e66f-4617-b07c-e98b3692a573" />)
-(<img width="1254" height="675" alt="population study" src="https://github.com/user-attachments/assets/50743d20-e37d-450a-84c3-5246b75c7233" />)
-(<img width="1255" height="710" alt="risk radar" src="https://github.com/user-attachments/assets/f8e56fa7-db2a-4c5f-8a9d-7eb92814c7ee" />)
-(<img width="1258" height="705" alt="decision report" src="https://github.com/user-attachments/assets/4e7ba0e0-3cf3-4e07-9685-59a6aefd699b" />)
+<img width="1265" height="791" alt="risk dashboard" src="https://github.com/user-attachments/assets/cef70ba1-e66f-4617-b07c-e98b3692a573" />
+<img width="1254" height="675" alt="population study" src="https://github.com/user-attachments/assets/50743d20-e37d-450a-84c3-5246b75c7233" />
+<img width="1255" height="710" alt="risk radar" src="https://github.com/user-attachments/assets/f8e56fa7-db2a-4c5f-8a9d-7eb92814c7ee" />
+<img width="1258" height="705" alt="decision report" src="https://github.com/user-attachments/assets/4e7ba0e0-3cf3-4e07-9685-59a6aefd699b" />
 
 ### 4. ePRO System (Patient View)
 *Web/Mobile-responsive interface for patients to report symptoms (patient reported outcome) and complete standardized questionnaires (QLQ-PRT20).*
-![ePRO System](<img width="1504" height="992" alt="epro system report" src="https://github.com/user-attachments/assets/ce90baa9-ffd7-4aba-826a-6caaacd8ab94" />)
-(<img width="1492" height="988" alt="epro EORTC" src="https://github.com/user-attachments/assets/1e560e01-8f82-4fc9-b74a-6c7c80a0eff7" />)
-(<img width="1508" height="987" alt="epro history" src="https://github.com/user-attachments/assets/d6cd95fe-8ee4-43cb-b32b-cf70a59a2fb8" />)
+<img width="1504" height="992" alt="epro system report" src="https://github.com/user-attachments/assets/ce90baa9-ffd7-4aba-826a-6caaacd8ab94" />
+<img width="1492" height="988" alt="epro EORTC" src="https://github.com/user-attachments/assets/1e560e01-8f82-4fc9-b74a-6c7c80a0eff7" />
+<img width="1508" height="987" alt="epro history" src="https://github.com/user-attachments/assets/d6cd95fe-8ee4-43cb-b32b-cf70a59a2fb8" />
 
 ### 5. Gemini Medical Suggestions
 *Integrated chatbot for real-time medical queries and data interpretation (API-key required).*
-![Gemini Chat Widget](<img width="371" height="598" alt="chatbot" src="https://github.com/user-attachments/assets/122b86ea-ade9-45f0-9034-d7340bc6aa58" />)
+<img width="371" height="598" alt="chatbot" src="https://github.com/user-attachments/assets/122b86ea-ade9-45f0-9034-d7340bc6aa58" />
 
 ---
 
