@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { PatientData, TreatmentType, Gender, AnalysisResult, ViewState, RadarData, EproRecord, ChatMessage, Prt20Record, HistoryItem } from './types';
 import { INITIAL_PATIENT_DATA, COMORBIDITY_OPTIONS, GENOMIC_OPTIONS, MOCK_DASHBOARD_STATS, MOCK_HISTORY_DATA, hydrateHistoryItem, EORTC_PRT20_ITEMS } from './constants';
@@ -377,7 +376,7 @@ const BellCurve = ({ percentile }: { percentile: number }) => {
 
 const EproView = () => {
   const [activeTab, setActiveTab] = useState<'report' | 'qlq-prt20' | 'history'>('report');
-  const [bleeding, setBleeding] = useState<'none' | 'mild' | 'severe'>('none');
+  const [bleeding, setBleeding] = useState<'none' | 'mild' | 'moderate' | 'severe'>('none');
   const [pain, setPain] = useState<number>(0);
   const [urgency, setUrgency] = useState<number>(0);
   const [frequency, setFrequency] = useState<number>(1);
@@ -500,6 +499,7 @@ const EproView = () => {
       switch(type) {
           case 'none': return 'None';
           case 'mild': return 'Mild';
+          case 'moderate': return 'Moderate';
           case 'severe': return 'Severe';
           default: return '';
       }
@@ -551,19 +551,24 @@ const EproView = () => {
                     </div>
                  </div>
                  
-                 {/* Camera Button Mock */}
-                 <button 
-                    onClick={handleMockPhotoAnalysis}
-                    className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors border border-gray-200"
-                    title="Simulate taking a photo for AI analysis"
-                 >
-                     <Icons.Camera />
-                     <span>Take a photo</span>
-                 </button>
+                 <div className="flex flex-col items-end">
+                    {/* Camera Button Mock */}
+                    <button 
+                        onClick={handleMockPhotoAnalysis}
+                        className="flex items-center space-x-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors border border-gray-200"
+                        title="Simulate taking a photo for AI analysis"
+                    >
+                        <Icons.Camera />
+                        <span>Take a photo</span>
+                    </button>
+                    <p className="text-[10px] text-gray-400 mt-2 italic text-right max-w-[200px] leading-tight">
+                        * You can use the "Take a photo" feature to let RadShield AI suggest a status.
+                    </p>
+                 </div>
              </div>
              
-             <div className="grid grid-cols-3 gap-4">
-                 {['none', 'mild', 'severe'].map((option) => (
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                 {['none', 'mild', 'moderate', 'severe'].map((option) => (
                      <button
                         key={option}
                         onClick={() => setBleeding(option as any)}
@@ -580,11 +585,6 @@ const EproView = () => {
                      </button>
                  ))}
              </div>
-             
-             {/* Info Text */}
-             <p className="text-xs text-gray-400 mt-4 text-right italic">
-                 * You can use the "Take a photo" feature to let RadShield AI suggest a status.
-             </p>
           </div>
 
           {/* Section 2: Sliders (Pain & Urgency) */}
@@ -702,16 +702,16 @@ const EproView = () => {
                       </div>
                       
                       <div className="space-y-8">
+                          <div className="bg-blue-50/50 p-2 rounded text-xs font-bold text-gray-600 uppercase tracking-wide">
+                              During the past week
+                          </div>
+
                           {/* Header for Likert items */}
                           <div className="hidden md:flex justify-end pr-2 text-xs font-bold text-gray-400 tracking-wider mb-2">
                               <span className="w-12 text-center mx-1">Not at all</span>
                               <span className="w-12 text-center mx-1">A little</span>
                               <span className="w-12 text-center mx-1">Quite a bit</span>
                               <span className="w-12 text-center mx-1">Very much</span>
-                          </div>
-
-                          <div className="bg-blue-50/50 p-2 rounded text-xs font-bold text-gray-600 uppercase tracking-wide">
-                              During the past week
                           </div>
 
                           {EORTC_PRT20_ITEMS.map((item, idx) => (
@@ -1761,7 +1761,7 @@ function App() {
                   : view === 'history'
                     ? 'Archive of past patient evaluations.'
                     : view === 'epro'
-                        ? 'Patient Reported Outcomes collection interface.'
+                        ? 'Patient reported outcome feedback'
                         : view === 'settings'
                             ? 'Configure application preferences.'
                             : 'Manage and evaluate radiation proctitis risks.'}
