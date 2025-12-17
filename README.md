@@ -1,8 +1,6 @@
 # RadShield - Radiation Proctitis Risk Evaluation Dashboard
 
-A modern, medical-grade web application designed for Radiation Oncologists to assess, visualize, and monitor the risk of Radiation Proctitis (RadPro) in patients undergoing radiation therapy.
-
-This project upgrades a legacy Streamlit prototype into a full-featured, responsive React application integrated with Google's Gemini 2.5 Flash AI for intelligent clinical decision support.
+A medical-grade web application designed for radiation oncologists to assess, visualize, and monitor the risk of "radiation proctitis" in patients undergoing radiation therapy.
 
 ---
 
@@ -69,7 +67,7 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 *   **Frontend**: React 19, TypeScript, Vite
 *   **Styling**: Tailwind CSS (Custom "Medical" color palette & Animations)
-*   **AI Engine**: Google GenAI SDK (`@google/genai`) connecting to Gemini 2.5 Flash
+*   **AI Engine**: Google GenAI SDK (`@google/genai`) connecting to Gemini
 *   **State Management**: React Hooks (`useState`, `useEffect`, `useRef`)
 *   **Icons**: Custom SVG Icons tailored for medical context
 
@@ -133,4 +131,4 @@ Radiation Proctitis is a common side effect of pelvic radiation therapy (e.g., f
 
 ## ⚠️ Disclaimer
 
-This application is a **prototype** for research and demonstration purposes. It is not an FDA-approved medical device. The risk scores and AI recommendations should be verified by a qualified medical professional before making clinical decisions.
+This application is a **prototype** for research and demonstration purposes. It is not an FDA-approved medical device (SoMD). The risk scores and AI recommendations should be verified by a qualified medical professional before making any clinical decisions.
