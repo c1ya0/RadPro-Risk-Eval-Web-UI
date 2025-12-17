@@ -10,7 +10,7 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 1. Department Dashboard
 *A high-level overview of department statistics, recent critical cases, and risk distribution.*
-![Department Dashboard](<img width="1509" height="992" alt="dashboard" src="https://github.com/user-attachments/assets/d1a658dc-3b21-46b5-83d4-4455d0f0ad7c" />)
+<img width="1509" height="992" alt="dashboard" src="https://github.com/user-attachments/assets/d1a658dc-3b21-46b5-83d4-4455d0f0ad7c" />
 
 
 ### 2. AI Risk Assessment Form
