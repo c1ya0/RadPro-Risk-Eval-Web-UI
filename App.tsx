@@ -386,7 +386,11 @@ const EproView = () => {
   // Update state to hold mixed record types
   const [history, setHistory] = useState<HistoryItem[]>([
       { type: 'general', id: 'REC-001', date: '2025-11-14', bleeding: 'none', pain: 2, urgency: 1, frequency: 1 },
-      { type: 'general', id: 'REC-002', date: '2025-11-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
+      { type: 'general', id: 'REC-002', date: '2025-11-10', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 },
+      { type: 'general', id: 'REC-003', date: '2025-11-08', bleeding: 'mild', pain: 3, urgency: 2, frequency: 2 },
+      { type: 'general', id: 'REC-004', date: '2025-11-05', bleeding: 'severe', pain: 7, urgency: 6, frequency: 4 },
+      { type: 'general', id: 'REC-005', date: '2025-11-02', bleeding: 'none', pain: 1, urgency: 1, frequency: 1 },
+      { type: 'general', id: 'REC-006', date: '2025-10-29', bleeding: 'mild', pain: 4, urgency: 3, frequency: 2 }
   ]);
   
   // PRT20 State

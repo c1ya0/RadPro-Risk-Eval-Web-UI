@@ -1,6 +1,8 @@
 # RadShield - Radiation Proctitis Risk Evaluation Dashboard
 
-A medical-grade web application designed for radiation oncologists to assess, visualize, and monitor the risk of "radiation proctitis" in patients undergoing radiation therapy.
+A modern, medical-grade web application designed for Radiation Oncologists to assess, visualize, and monitor the risk of Radiation Proctitis (RadPro) in patients undergoing radiation therapy.
+
+This project upgrades a legacy Streamlit prototype into a full-featured, responsive React application integrated with Google's Gemini 2.5 Flash AI for intelligent clinical decision support.
 
 ---
 
@@ -8,36 +10,30 @@ A medical-grade web application designed for radiation oncologists to assess, vi
 
 ### 1. Department Dashboard
 *A high-level overview of department statistics, recent critical cases, and risk distribution.*
-<img width="1509" height="992" alt="dashboard" src="https://github.com/user-attachments/assets/d1a658dc-3b21-46b5-83d4-4455d0f0ad7c" />
-
+![Department Dashboard](docs/images/dashboard_preview.png)
 
 ### 2. AI Risk Assessment Form
-*Structured clinical intake form integrating demographics, dosimetry, and AI-suggested clinical notes.*
-<img width="1496" height="992" alt="risk assessment" src="https://github.com/user-attachments/assets/c2321f5d-6d31-4e51-a6f6-4eb033bfc97e" />
+*Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
+![Risk Assessment Form](docs/images/assessment_form.png)
 
 ### 3. Analysis Results & Clinical Decision Support
-*Comprehensive risk report featuring risk dashboard, population risk positioning, risk radar analysis, clinical report preview.*
-<img width="1265" height="791" alt="risk dashboard" src="https://github.com/user-attachments/assets/cef70ba1-e66f-4617-b07c-e98b3692a573" />
-<img width="1254" height="675" alt="population study" src="https://github.com/user-attachments/assets/50743d20-e37d-450a-84c3-5246b75c7233" />
-<img width="1255" height="710" alt="risk radar" src="https://github.com/user-attachments/assets/f8e56fa7-db2a-4c5f-8a9d-7eb92814c7ee" />
-<img width="1258" height="705" alt="decision report" src="https://github.com/user-attachments/assets/4e7ba0e0-3cf3-4e07-9685-59a6aefd699b" />
+*Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
+![Analysis Results](docs/images/results_view.png)
 
-### 4. ePRO System (Patient feedback)
-*Web/Mobile-responsive interface for patients to report symptoms (patient reported outcome) and complete standardized questionnaires (QLQ-PRT20).*
-<img width="1504" height="992" alt="epro system report" src="https://github.com/user-attachments/assets/ce90baa9-ffd7-4aba-826a-6caaacd8ab94" />
-<img width="1492" height="988" alt="epro EORTC" src="https://github.com/user-attachments/assets/1e560e01-8f82-4fc9-b74a-6c7c80a0eff7" />
-<img width="1508" height="987" alt="epro history" src="https://github.com/user-attachments/assets/d6cd95fe-8ee4-43cb-b32b-cf70a59a2fb8" />
+### 4. ePRO System (Patient View)
+*Mobile-responsive interface for patients to report symptoms and complete standardized questionnaires (QLQ-PRT20).*
+![ePRO System](docs/images/epro_system.png)
 
-### 5. Gemini Medical Suggestions
-*Integrated chatbot for real-time medical queries and data interpretation (API-key required).*
-<img width="371" height="598" alt="chatbot" src="https://github.com/user-attachments/assets/122b86ea-ade9-45f0-9034-d7340bc6aa58" />
+### 5. Gemini Medical Assistant
+*Integrated chatbot for real-time medical queries and data interpretation.*
+![Gemini Chat Widget](docs/images/chat_widget.png)
 
 ---
 
 ## 🌟 Key Features
 
 ### 1. **Intelligent Risk Assessment**
-*   **AI-Powered Analysis**: Integrates **Google Gemini** to analyze structured data (Dosimetry, Demographics) and unstructured text (Clinical Notes, Genomic Markers).
+*   **AI-Powered Analysis**: Utilizes **Google Gemini 2.5 Flash** to analyze structured data (Dosimetry, Demographics) and unstructured text (Clinical Notes, Genomic Markers).
 *   **Dual-Risk Scoring**: Calculates distinct probability scores for **Acute Toxicity** (0-3 months) and **Late Toxicity** (>6 months).
 *   **Multi-Dimensional Radar**: Visualizes risk contributions across 5 key axes: Genomics, Dosimetry, Age, Medications, and Comorbidities.
 
@@ -67,7 +63,7 @@ A medical-grade web application designed for radiation oncologists to assess, vi
 
 *   **Frontend**: React 19, TypeScript, Vite
 *   **Styling**: Tailwind CSS (Custom "Medical" color palette & Animations)
-*   **AI Engine**: Google GenAI SDK (`@google/genai`) connecting to Gemini
+*   **AI Engine**: Google GenAI SDK (`@google/genai`) connecting to Gemini 2.5 Flash
 *   **State Management**: React Hooks (`useState`, `useEffect`, `useRef`)
 *   **Icons**: Custom SVG Icons tailored for medical context
 
@@ -131,4 +127,4 @@ Radiation Proctitis is a common side effect of pelvic radiation therapy (e.g., f
 
 ## ⚠️ Disclaimer
 
-This application is a **prototype** for research and demonstration purposes. It is not an FDA-approved medical device (SoMD). The risk scores and AI recommendations should be verified by a qualified medical professional before making any clinical decisions.
+This application is a **prototype** for research and demonstration purposes. It is not an FDA-approved medical device. The risk scores and AI recommendations should be verified by a qualified medical professional before making clinical decisions.
