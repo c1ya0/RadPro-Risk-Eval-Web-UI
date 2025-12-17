@@ -24,7 +24,7 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 <img width="1255" height="710" alt="risk radar" src="https://github.com/user-attachments/assets/f8e56fa7-db2a-4c5f-8a9d-7eb92814c7ee" />
 <img width="1258" height="705" alt="decision report" src="https://github.com/user-attachments/assets/4e7ba0e0-3cf3-4e07-9685-59a6aefd699b" />
 
-### 4. ePRO System (Patient View)
+### 4. ePRO System (Patient feedback)
 *Web/Mobile-responsive interface for patients to report symptoms (patient reported outcome) and complete standardized questionnaires (QLQ-PRT20).*
 <img width="1504" height="992" alt="epro system report" src="https://github.com/user-attachments/assets/ce90baa9-ffd7-4aba-826a-6caaacd8ab94" />
 <img width="1492" height="988" alt="epro EORTC" src="https://github.com/user-attachments/assets/1e560e01-8f82-4fc9-b74a-6c7c80a0eff7" />
