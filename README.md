@@ -10,23 +10,33 @@ This project upgrades a legacy Streamlit prototype into a full-featured, respons
 
 ### 1. Department Dashboard
 *A high-level overview of department statistics, recent critical cases, and risk distribution.*
-![Department Dashboard](docs/images/dashboard_preview.png)
+<img width="1509" height="992" alt="dashboard" src="https://github.com/user-attachments/assets/67350764-cc8b-4410-95d9-4c9b17918316" />
+
 
 ### 2. AI Risk Assessment Form
 *Structured clinical intake form integrating demographics, dosimetry, and AI-analyzed clinical notes.*
-![Risk Assessment Form](docs/images/assessment_form.png)
+<img width="1496" height="992" alt="risk assessment" src="https://github.com/user-attachments/assets/62e3f7b3-772d-4bbc-8112-ce0ee7e21bb3" />
+
 
 ### 3. Analysis Results & Clinical Decision Support
 *Comprehensive risk report featuring multi-dimensional radar charts, population positioning, and AI-generated reasoning.*
-![Analysis Results](docs/images/results_view.png)
+<img width="1265" height="791" alt="risk dashboard" src="https://github.com/user-attachments/assets/86904ef4-b7a0-4aea-b1ea-723ca32116a7" />
+<img width="1254" height="675" alt="population study" src="https://github.com/user-attachments/assets/417c2de5-1c4e-4344-8ddf-2c5fac7a6c15" />
+<img width="1255" height="710" alt="risk radar" src="https://github.com/user-attachments/assets/8071df5c-e393-4a29-87cc-e74fcfb35167" />
+<img width="1258" height="705" alt="decision report" src="https://github.com/user-attachments/assets/ee566061-a11e-45b1-a9a2-a25579d4bd02" />
+
 
 ### 4. ePRO System (Patient View)
 *Mobile-responsive interface for patients to report symptoms and complete standardized questionnaires (QLQ-PRT20).*
-![ePRO System](docs/images/epro_system.png)
+<img width="1504" height="992" alt="epro system report" src="https://github.com/user-attachments/assets/d8c98714-bd0c-46c9-988b-80aee163dcb0" />
+<img width="1492" height="988" alt="epro EORTC" src="https://github.com/user-attachments/assets/515950de-e3be-449e-8e99-bd3406dc3f20" />
+<img width="1508" height="987" alt="epro history" src="https://github.com/user-attachments/assets/fd63657b-1fb7-4bb8-a4e5-c86720303f36" />
+
 
 ### 5. Gemini Medical Assistant
 *Integrated chatbot for real-time medical queries and data interpretation.*
-![Gemini Chat Widget](docs/images/chat_widget.png)
+<img width="371" height="598" alt="chatbot" src="https://github.com/user-attachments/assets/079f54b3-1f8a-4204-8bdb-abd573486017" />
+
 
 ---
 
